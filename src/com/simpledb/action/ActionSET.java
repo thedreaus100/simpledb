@@ -7,6 +7,7 @@ import com.simpledb.result.Result;
 import com.simpledb.tokenizer.ActionSETTokenizer;
 
 import java.util.Stack;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ActionSET extends Action<String> {
 
@@ -15,7 +16,7 @@ public class ActionSET extends Action<String> {
     }
 
     @Override
-    protected Result _execute(Memtable<String> memtable, Stack<LookupIndex> indexStack, String input) {
+    protected Result _execute(Memtable<String> memtable, ConcurrentLinkedDeque<LookupIndex> indexStack, String input) {
 
         KeyValuePair<String> keyValuePair = tokenizer.tokenize(input);
         memtable.insert(keyValuePair);

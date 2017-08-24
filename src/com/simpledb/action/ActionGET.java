@@ -5,6 +5,7 @@ import com.simpledb.memtable.Memtable;
 import com.simpledb.result.Result;
 
 import java.util.Stack;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ActionGET extends  Action<String>{
 
@@ -13,7 +14,7 @@ public class ActionGET extends  Action<String>{
     }
 
     @Override
-    protected Result _execute(Memtable<String> memtable, Stack<LookupIndex> indexStack, String input) {
+    protected Result _execute(Memtable<String> memtable, ConcurrentLinkedDeque<LookupIndex> indexStack, String input) {
         Object value = memtable.getMap().get(input.trim());
         if(value != null){
 

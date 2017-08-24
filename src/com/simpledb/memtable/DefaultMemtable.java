@@ -25,7 +25,10 @@ public class DefaultMemtable implements Memtable<String> {
     @Override
     public void insert(KeyValuePair<String> keyValuePair) {
         cacheMap.put(keyValuePair.getKey(), keyValuePair.getValue());
-        size += writer.calculateSpace(keyValuePair);
+
+        synchronized (this){
+            size += writer.calculateSpace(keyValuePair);
+        }
     }
 
     @Override

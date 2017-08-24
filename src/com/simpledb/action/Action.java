@@ -7,6 +7,7 @@ import com.simpledb.tokenizer.Tokenizer;
 import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import java.util.Stack;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public abstract class Action<K> {
 
@@ -15,7 +16,7 @@ public abstract class Action<K> {
         this.tokenizer = tokenizer;
     }
 
-    public Result execute(Memtable<K> memtable, Stack<LookupIndex> indexStack, K input) throws InvalidInputException {
+    public Result execute(Memtable<K> memtable, ConcurrentLinkedDeque<LookupIndex> indexStack, K input) throws InvalidInputException {
 
         if(this.tokenizer == null || this.tokenizer.getValidator().validate(input)){
            return  _execute(memtable, indexStack, input);
@@ -24,5 +25,5 @@ public abstract class Action<K> {
         }
     }
 
-    protected abstract Result _execute(Memtable<K> memtable,  Stack<LookupIndex> indexStack, K input);
+    protected abstract Result _execute(Memtable<K> memtable,  ConcurrentLinkedDeque<LookupIndex> indexStack, K input);
 }

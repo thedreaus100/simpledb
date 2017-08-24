@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
@@ -36,7 +37,7 @@ public class DefaultProcessor implements Runnable {
     private InputStream inputStream;
     private final ExecutorService cacheService;
     private Map<String, Action<String>> actionMap;
-    private final Stack<LookupIndex> indexStack;
+    private final ConcurrentLinkedDeque<LookupIndex> indexStack;
 
     public DefaultProcessor(){
         this(System.in);
@@ -55,7 +56,7 @@ public class DefaultProcessor implements Runnable {
 
         this.inputStream = in;
         this.actionMap = new HashMap<String, Action<String>>();
-        this.indexStack = new Stack<LookupIndex>();
+        this.indexStack = new ConcurrentLinkedDeque<LookupIndex>();
         registerActions(this.actionMap);
         ExecutorContext.getInstance().register(cacheService);
     }

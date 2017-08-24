@@ -52,6 +52,7 @@ public class DefaultLogWriter implements LogWriter<String> {
         try(ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(outputStream);){
 
+            //Transform
             oos.writeObject(value);
             return outputStream.size();
 
@@ -65,6 +66,7 @@ public class DefaultLogWriter implements LogWriter<String> {
     @Override
     public LookupIndex dump(Memtable<String> memtable) throws IOException {
 
+        //LookUpIndex {file_name, Map[{"allison": 0},"cathy":"256"....]
         String fileName = this.dirname + File.separator + DateTime.now().getMillis();
         File file = new File(fileName);
         try(FileOutputStream fos = new FileOutputStream(file);
@@ -81,6 +83,8 @@ public class DefaultLogWriter implements LogWriter<String> {
                         bos.write(keyValuePairDelimiter);
                         oos.writeObject(value);
                         bos.write(this.fieldDelimiter);
+
+                        //pos in file???
 
                     }catch(IOException e){
                         e.printStackTrace();
