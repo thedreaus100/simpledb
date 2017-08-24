@@ -1,6 +1,8 @@
 package com.simpledb;
 
 import com.simpledb.memtable.Memtable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.Scanner;
@@ -12,6 +14,7 @@ public class SimpleDB {
     private static Memtable<String> memTable;
     private static boolean test = true;
     private static ExecutorService service;
+    private static Logger logger = LogManager.getRootLogger();
 
 
     public static void main(String[] args) {
@@ -33,7 +36,7 @@ public class SimpleDB {
             public void run() {
                 try{
                     for(ExecutorService service:ExecutorContext.getInstance().getExecutorServices()){
-                        System.out.println("Shutting Down: " + service);
+                        logger.trace("Shutting Down: " + service);
                         service.shutdownNow();
                     }
                 }catch(Exception e){

@@ -7,6 +7,7 @@ import com.simpledb.result.Result;
 import com.simpledb.tokenizer.ActionSETTokenizer;
 import com.simpledb.writer.LogWriter;
 
+import java.io.OutputStream;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -14,9 +15,9 @@ import java.util.concurrent.ExecutorService;
 
 public class ActionSET extends Action<String> {
 
-    public ActionSET(){
+    public ActionSET(OutputStream out){
 
-        super(new ActionSETTokenizer());
+        super(new ActionSETTokenizer(), out);
     }
 
     @Override
@@ -28,9 +29,12 @@ public class ActionSET extends Action<String> {
             @Override
             public Result call() throws Exception {
 
+                Result result = null;
                 KeyValuePair<String> keyValuePair = tokenizer.tokenize(input);
                 memtable.insert(keyValuePair);
-                return new Result(String.format("INSERTED:\t%s", keyValuePair));
+                result = new Result(String.format("INSERTED:\t%s", keyValuePair));
+                outputResult(result);
+                return result;
             }
         };
     }

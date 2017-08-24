@@ -13,6 +13,6 @@ public class Result {
 
     @Override
     public String toString(){
-        return "#" + message;
+        return "<\t" + message;
     }
 }

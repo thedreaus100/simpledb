@@ -1,0 +1,112 @@
+[DEBUG] 2017-08-24 11:23:39.258 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:40.256 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:41.257 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:42.256 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:43.258 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:44.258 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:45.260 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:46.258 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:47.259 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:48.258 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:49.261 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:50.255 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:51.257 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:52.259 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:53.256 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:54.258 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:55.257 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:56.260 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:57.260 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:58.260 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:23:59.259 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:00.258 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:01.256 [pool-4-thread-2]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:02.260 [pool-4-thread-2]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:03.255 [pool-4-thread-2]  - Memtable size: 0, full: false
+[TRACE] 2017-08-24 11:24:04.210 [Thread-1]  - Shutting Down: java.util.concurrent.ThreadPoolExecutor@63350dc3[Running, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
+[TRACE] 2017-08-24 11:24:04.211 [Thread-1]  - Shutting Down: java.util.concurrent.ScheduledThreadPoolExecutor@6df2efd5[Running, pool size = 2, active threads = 0, queued tasks = 1, completed tasks = 25]
+[TRACE] 2017-08-24 11:24:04.211 [Thread-1]  - Shutting Down: java.util.concurrent.ThreadPoolExecutor@69cd66b3[Running, pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
+[DEBUG] 2017-08-24 11:24:27.497 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:28.500 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:29.495 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:30.499 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:31.500 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:32.500 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:33.497 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:34.500 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:35.497 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:36.497 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:37.497 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:38.497 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:39.497 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:24:40.496 [pool-4-thread-1]  - Memtable size: 0, full: false
+[ERROR] 2017-08-24 11:24:41.091 [pool-2-thread-1]  - java.util.concurrent.TimeoutException
+[DEBUG] 2017-08-24 11:24:41.500 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:42.495 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:43.498 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:44.496 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:45.499 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:46.499 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:47.500 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:48.498 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:49.497 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:50.497 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:51.500 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:52.495 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:53.495 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:54.500 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:55.497 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:56.497 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:57.499 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:58.496 [pool-4-thread-1]  - Memtable size: 40, full: false
+[DEBUG] 2017-08-24 11:24:59.498 [pool-4-thread-1]  - Memtable size: 40, full: false
+[TRACE] 2017-08-24 11:24:59.764 [Thread-1]  - Shutting Down: java.util.concurrent.ThreadPoolExecutor@6ea36eeb[Running, pool size = 1, active threads = 0, queued tasks = 0, completed tasks = 1]
+[TRACE] 2017-08-24 11:24:59.765 [Thread-1]  - Shutting Down: java.util.concurrent.ScheduledThreadPoolExecutor@60649d4f[Running, pool size = 2, active threads = 0, queued tasks = 1, completed tasks = 33]
+[TRACE] 2017-08-24 11:24:59.766 [Thread-1]  - Shutting Down: java.util.concurrent.ThreadPoolExecutor@645b059b[Running, pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]
+[DEBUG] 2017-08-24 11:28:52.710 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:28:53.711 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:28:54.712 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:28:55.710 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:28:56.709 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:28:57.710 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:28:58.711 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:28:59.709 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:29:00.712 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:29:01.709 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:29:02.711 [pool-4-thread-1]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:29:03.710 [pool-4-thread-2]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:29:04.711 [pool-4-thread-2]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:29:05.709 [pool-4-thread-2]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:29:06.712 [pool-4-thread-2]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:29:07.708 [pool-4-thread-2]  - Memtable size: 0, full: false
+[DEBUG] 2017-08-24 11:29:08.710 [pool-4-thread-2]  - Memtable size: 0, full: false
+[ERROR] 2017-08-24 11:29:09.646 [pool-2-thread-1]  - COMMAND FAILED TO EXECUTE: 
+java.util.concurrent.TimeoutException: null
+	at java.util.concurrent.FutureTask.get(FutureTask.java:205) ~[?:1.8.0_131]
+	at com.simpledb.DefaultProcessor.processActions(DefaultProcessor.java:137) [classes/:?]
+	at com.simpledb.DefaultProcessor.run(DefaultProcessor.java:110) [classes/:?]
+	at java.lang.Thread.run(Thread.java:748) [?:1.8.0_131]
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511) [?:1.8.0_131]
+	at java.util.concurrent.FutureTask.run(FutureTask.java:266) [?:1.8.0_131]
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142) [?:1.8.0_131]
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617) [?:1.8.0_131]
+	at java.lang.Thread.run(Thread.java:748) [?:1.8.0_131]
+[DEBUG] 2017-08-24 11:29:09.709 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:10.708 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:11.708 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:12.708 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:13.709 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:14.708 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:15.709 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:16.711 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:17.709 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:18.711 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:19.709 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:20.712 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:21.709 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:22.709 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:23.711 [pool-4-thread-2]  - Memtable size: 11, full: false
+[DEBUG] 2017-08-24 11:29:24.711 [pool-4-thread-2]  - Memtable size: 11, full: false
+[TRACE] 2017-08-24 11:29:24.903 [Thread-1]  - Shutting Down: java.util.concurrent.ThreadPoolExecutor@34e9e697[Running, pool size = 1, active threads = 0, queued tasks = 0, completed tasks = 1]
+[TRACE] 2017-08-24 11:29:24.904 [Thread-1]  - Shutting Down: java.util.concurrent.ScheduledThreadPoolExecutor@3a2e0e7a[Running, pool size = 2, active threads = 0, queued tasks = 1, completed tasks = 33]
+[TRACE] 2017-08-24 11:29:24.904 [Thread-1]  - Shutting Down: java.util.concurrent.ThreadPoolExecutor@3e118de7[Running, pool size = 1, active threads = 1, queued tasks = 0, completed tasks = 0]

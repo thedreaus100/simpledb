@@ -4,6 +4,7 @@ import com.simpledb.index.LookupIndex;
 import com.simpledb.memtable.Memtable;
 import com.simpledb.result.Result;
 
+import java.io.OutputStream;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -11,9 +12,9 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class ActionGET extends  Action<String>{
 
     private final ConcurrentLinkedDeque<LookupIndex> indexStack;
-    public ActionGET(ConcurrentLinkedDeque<LookupIndex> indexStack){
+    public ActionGET(ConcurrentLinkedDeque<LookupIndex> indexStack, OutputStream out){
 
-        super(null);
+        super(null, out);
         this.indexStack = indexStack;
     }
 
@@ -25,14 +26,16 @@ public class ActionGET extends  Action<String>{
            @Override
            public Result call() throws Exception {
                Object value = memtable.getMap().get(input.trim());
+               Result result = null;
                if(value != null){
 
-                   return new Result(value.toString());
+                   result = new Result(value.toString());
                }else{
 
-                   System.out.println("Need to traverse lookup index stack");
-                   return null;
+                   result = new Result("the data should be in the LookupIndex Stack... but this hasn't been implemented yet :(");
                }
+               outputResult(result);
+               return result;
            }
        };
     }

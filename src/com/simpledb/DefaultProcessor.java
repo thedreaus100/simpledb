@@ -18,6 +18,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -27,25 +29,51 @@ import java.util.function.BiFunction;
 
 public class DefaultProcessor implements Runnable {
 
+    //Core
     private Memtable<String> memTable;
-    private ActionTokenizer actionTokenizer;
-    private CompoundValidator<String> validator;
-    private final LogWriter<String> writer;
-    private Logger logger = LogManager.getRootLogger();
-    private InputStream inputStream;
-    private Map<String, Action<String>> actionMap;
     private final ConcurrentLinkedDeque<LookupIndex> indexStack;
+    private final LogWriter<String> writer;
+    private final ClientType clientType;
 
     //Executors
     private final ExecutorService cacheService;
     private final ScheduledExecutorService daemons;
 
-    public DefaultProcessor(){
-        this(System.in);
+    //Client Input
+    private String prompt = ">\t";
+    private Map<String, Action<String>> actionMap;
+    private ActionTokenizer actionTokenizer;
+    private CompoundValidator<String> validator;
+
+    //Log
+    private Logger logger = LogManager.getRootLogger();
+
+    //IO
+    private InputStream inputStream;
+    private OutputStream outputStream;
+    private PrintStream printStream;
+
+    public enum ClientType{
+        CMD(0), API(1);
+
+        private int type;
+        private ClientType(int type){
+            this.type = type;
+        }
+
+        public int getType() {
+            return type;
+        }
     }
 
-    public DefaultProcessor(InputStream in){
+    public DefaultProcessor(){
 
+        this(ClientType.CMD, System.in, System.out);
+    }
+
+    public DefaultProcessor(ClientType clientType, InputStream in, OutputStream out){
+
+        this.clientType = clientType;
         this.writer = new DefaultLogWriter();
         this.memTable = new DefaultMemtable(writer);
         this.actionTokenizer = new ActionTokenizer();
@@ -57,6 +85,8 @@ public class DefaultProcessor implements Runnable {
         );
 
         this.inputStream = in;
+        this.outputStream = out;
+        this.printStream = new PrintStream(out);
         this.actionMap = new HashMap<String, Action<String>>();
         this.indexStack = new ConcurrentLinkedDeque<LookupIndex>();
         registerActions(this.actionMap);
@@ -68,21 +98,24 @@ public class DefaultProcessor implements Runnable {
 
     public void registerActions(Map<String, Action<String>> actionMap){
 
-        actionMap.put("SET", new ActionSET());
-        actionMap.put("GET", new ActionGET(indexStack));
+        actionMap.put("SET", new ActionSET(this.outputStream));
+        actionMap.put("GET", new ActionGET(indexStack, this.outputStream));
     }
 
     public void run() {
 
+        daemons.scheduleAtFixedRate(manageMemtable(), 0, 1000, TimeUnit.MILLISECONDS);
+
         //Main Thread
         processActions();
-        daemons.scheduleAtFixedRate(manageMemtable(), 0, 500, TimeUnit.MILLISECONDS);
     }
 
     public void processActions(){
 
         Scanner scanner = new Scanner(this.inputStream);
         String input = null;
+
+        prompt();
         do{
             try{
                 input = scanner.nextLine();
@@ -95,20 +128,45 @@ public class DefaultProcessor implements Runnable {
                         Future<Result> futureResult = cacheService.submit(
                                 action.execute(memTable, (String) queryPair.getValue())
                         );
+
+
+                        /*
+                            Force Blocking for Actions if the Client is a Human
+                         */
+                        if(this.clientType.equals(ClientType.CMD)){
+                            Result result = futureResult.get(10, TimeUnit.SECONDS);
+                            this.printStream.println();
+                        }
                     }else{
-                        System.out.println("Invalid Input");
+                        printStream.println("Invalid Input");
                     }
+                    prompt();
                 }else{
-                    Thread.sleep(500);
+                    //wait for user input
+                    Thread.sleep(1000);
                 }
-            }catch(Exception e){
+            }catch(InterruptedException e){
 
                 e.printStackTrace();
-                logger.warn(e.getMessage());
+                logger.error(e);
+                break;
             }
-        }while(true);
+            catch (ExecutionException e) {
+                logger.error("COMMAND FAILED TO EXECUTE: ", e);
+                prompt();
+            } catch (TimeoutException e) {
+                logger.error("COMMAND FAILED TO EXECUTE: ", e);
+                prompt();
+            }
+        }while(true && !Thread.interrupted());
     }
 
+    /*
+        Frequentally check the size of the memtable to see if its full if it is full... block subsequent writes
+        to the memtable, then spawn a process to dump the memtable to file.
+
+        ideally this would only need to run if the db is actively being written too.
+     */
     public Runnable manageMemtable(){
 
         return ()->{
@@ -132,5 +190,11 @@ public class DefaultProcessor implements Runnable {
                 e.printStackTrace();
             }
         };
+    }
+
+    public void prompt(){
+        if(clientType.equals(ClientType.CMD)){
+            this.printStream.print(this.prompt);
+        }
     }
 }

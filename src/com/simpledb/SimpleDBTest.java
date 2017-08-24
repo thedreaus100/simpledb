@@ -1,5 +1,7 @@
 package com.simpledb;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -21,8 +23,12 @@ public class SimpleDBTest {
 
     private final ExecutorService executorService;
 
+    private static Logger logger = LogManager.getRootLogger();
     public SimpleDBTest(){
+
+        Runtime.getRuntime().addShutdownHook(SimpleDB.shutdown());
         executorService = Executors.newFixedThreadPool(1);
+        ExecutorContext.getInstance().register(executorService);
     }
 
     @Test
@@ -42,7 +48,7 @@ public class SimpleDBTest {
             pos.connect(pis);
 
             runnables.add(SimpleDBTest.fillSimpleDB(pis, pos));
-            runnables.add(new DefaultProcessor(pis));
+            runnables.add(new DefaultProcessor(DefaultProcessor.ClientType.API, pis, System.out));
 
             int numThreads = runnables.size();
             final CountDownLatch allExecutorThreadsReady = new CountDownLatch(numThreads);
@@ -74,7 +80,7 @@ public class SimpleDBTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally{
-            System.out.println("Shutting down pool");
+            logger.trace("Shutting down pool");
             threadPool.shutdownNow();
         }
 
@@ -128,5 +134,23 @@ public class SimpleDBTest {
             uuids[i] = UUID.randomUUID().toString();
         }
         return uuids;
+    }
+
+    public static Thread shutdown(){
+
+        return new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try{
+                    for(ExecutorService service:ExecutorContext.getInstance().getExecutorServices()){
+                        logger.trace("Shutting Down: " + service);
+                        service.shutdownNow();
+                    }
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }){};
     }
 }

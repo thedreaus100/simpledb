@@ -90,6 +90,7 @@ public class DefaultLogWriter implements LogWriter<String> {
                     System.out.println("File POSTION: " + pos);
                     buffer.flip();
 
+                    //Find class to do this more effeciently don't want to write one byte at a time
                     while(buffer.hasRemaining()){
                         bos.write(buffer.get());
                     }
