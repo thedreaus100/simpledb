@@ -5,6 +5,7 @@ import com.simpledb.memtable.Memtable;
 import com.simpledb.result.Result;
 
 import java.util.Stack;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ActionGET extends  Action<String>{
@@ -14,15 +15,22 @@ public class ActionGET extends  Action<String>{
     }
 
     @Override
-    protected Result _execute(Memtable<String> memtable, ConcurrentLinkedDeque<LookupIndex> indexStack, String input) {
-        Object value = memtable.getMap().get(input.trim());
-        if(value != null){
+    protected Callable<Result> _execute(Memtable<String> memtable, ConcurrentLinkedDeque<LookupIndex> indexStack, String input) {
 
-            return new Result(value.toString());
-        }else{
+       return new Callable<Result>(){
 
-            System.out.println("Need to traverse lookup index stack");
-            return null;
-        }
+           @Override
+           public Result call() throws Exception {
+               Object value = memtable.getMap().get(input.trim());
+               if(value != null){
+
+                   return new Result(value.toString());
+               }else{
+
+                   System.out.println("Need to traverse lookup index stack");
+                   return null;
+               }
+           }
+       };
     }
 }

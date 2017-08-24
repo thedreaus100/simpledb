@@ -6,6 +6,7 @@ import com.simpledb.memtable.Memtable;
 import org.joda.time.DateTime;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -58,8 +59,7 @@ public class DefaultLogWriter implements LogWriter<String> {
 
         }catch(IOException e){
 
-            //TODO process exception
-            return -1; //Should denote try again... could also be a memory issue here
+            return -1;
         }
     }
 
@@ -73,23 +73,29 @@ public class DefaultLogWriter implements LogWriter<String> {
             BufferedOutputStream bos = new BufferedOutputStream(fos);
             ObjectOutputStream oos = new ObjectOutputStream(bos)){
 
-            memtable
-                .getMap()
-                .navigableKeySet()
-                .stream().forEach(key -> {
-                    try{
-                        Serializable value = memtable.getMap().get(key);
-                        bos.write(getBytes(key));
-                        bos.write(keyValuePairDelimiter);
-                        oos.writeObject(value);
-                        bos.write(this.fieldDelimiter);
+            long pos = 0;
+            ByteBuffer buffer = ByteBuffer.allocate(memtable.getSize());
+            int partionSize = memtable.getSize()/4;
+            for(String key:memtable.getMap().navigableKeySet()){
 
-                        //pos in file???
+                Serializable value = memtable.getMap().get(key);
+                buffer.put(getBytes(key));
+                buffer.putChar(keyValuePairDelimiter);
+                buffer.put(getBytes((String) value)); //will add unnecessary space
+                buffer.putChar(this.fieldDelimiter);
 
-                    }catch(IOException e){
-                        e.printStackTrace();
+                if(buffer.position() >= partionSize){
+
+                    pos += buffer.position();
+                    System.out.println("File POSTION: " + pos);
+                    buffer.flip();
+
+                    while(buffer.hasRemaining()){
+                        bos.write(buffer.get());
                     }
-                });
+                    buffer.flip();
+                }
+            }
 
             return null;
         }catch(IOException e){
