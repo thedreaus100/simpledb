@@ -10,12 +10,15 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ActionGET extends  Action<String>{
 
-    public ActionGET(){
+    private final ConcurrentLinkedDeque<LookupIndex> indexStack;
+    public ActionGET(ConcurrentLinkedDeque<LookupIndex> indexStack){
+
         super(null);
+        this.indexStack = indexStack;
     }
 
     @Override
-    protected Callable<Result> _execute(Memtable<String> memtable, ConcurrentLinkedDeque<LookupIndex> indexStack, String input) {
+    protected Callable<Result> _execute(Memtable<String> memtable, String input) {
 
        return new Callable<Result>(){
 

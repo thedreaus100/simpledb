@@ -7,10 +7,11 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class DefaultMemtable implements Memtable<String> {
 
-    private TreeMap<String, Serializable> cacheMap;
+    private ConcurrentSkipListMap<String, Serializable> cacheMap;
     private int maxSize;
     private int size = 0;
     private final LogWriter<String> writer;
@@ -18,7 +19,7 @@ public class DefaultMemtable implements Memtable<String> {
     public DefaultMemtable(LogWriter<String> writer){
 
         this.writer = writer;
-        cacheMap = new TreeMap<String, Serializable>();
+        cacheMap = new ConcurrentSkipListMap<String, Serializable>();
         maxSize = 1024;
     }
 
@@ -42,7 +43,7 @@ public class DefaultMemtable implements Memtable<String> {
     }
 
     @Override
-    public TreeMap<String, Serializable> getMap() {
+    public ConcurrentSkipListMap<String, Serializable> getMap() {
 
         return cacheMap;
     }

@@ -25,6 +25,7 @@ import java.util.Stack;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.BiFunction;
 
 public class DefaultProcessor implements Runnable {
@@ -58,13 +59,14 @@ public class DefaultProcessor implements Runnable {
         this.actionMap = new HashMap<String, Action<String>>();
         this.indexStack = new ConcurrentLinkedDeque<LookupIndex>();
         registerActions(this.actionMap);
+
         ExecutorContext.getInstance().register(cacheService);
     }
 
     public void registerActions(Map<String, Action<String>> actionMap){
 
         actionMap.put("SET", new ActionSET());
-        actionMap.put("GET", new ActionGET());
+        actionMap.put("GET", new ActionGET(indexStack));
     }
 
     public void run() {
@@ -80,8 +82,11 @@ public class DefaultProcessor implements Runnable {
                        KeyValuePair<String> queryPair = this.actionTokenizer.tokenize(input);
                        Action<String> action = actionMap.get(queryPair.getKey().toUpperCase());
                        //TODO: Need to refactor KeyValuePair CAST isn't good!
-                       Result result = action.execute(memTable, indexStack, (String) queryPair.getValue());
-                       System.out.println(result);
+
+                       Future<Result> futureResult = cacheService.submit(
+                               action.execute(memTable, (String) queryPair.getValue())
+                       );
+
                        logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
                        if(memTable.isFull()){
                             this.cacheService.submit(dump(writer, memTable));

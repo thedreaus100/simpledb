@@ -17,14 +17,14 @@ public abstract class Action<K> {
         this.tokenizer = tokenizer;
     }
 
-    public Callable<Result> execute(Memtable<K> memtable, ConcurrentLinkedDeque<LookupIndex> indexStack, K input) throws InvalidInputException {
+    public Callable<Result> execute(Memtable<K> memtable, K input) throws InvalidInputException {
 
         if(this.tokenizer == null || this.tokenizer.getValidator().validate(input)){
-           return  _execute(memtable, indexStack, input);
+           return  _execute(memtable, input);
         }else{
             throw new InvalidInputException("Invalid Input");
         }
     }
 
-    protected abstract Callable<Result> _execute(Memtable<K> memtable,  ConcurrentLinkedDeque<LookupIndex> indexStack, K input);
+    protected abstract Callable<Result> _execute(Memtable<K> memtable, K input);
 }

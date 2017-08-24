@@ -26,12 +26,13 @@
       <change type="DELETED" beforePath="$PROJECT_DIR$/data/1503532794636" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/data/1503532794646" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/data/1503532795656" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/com/simpledb/writer/DefaultLogWriter.class" afterPath="$PROJECT_DIR$/target/classes/com/simpledb/writer/DefaultLogWriter.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/simpledb/DefaultProcessor.java" afterPath="$PROJECT_DIR$/src/com/simpledb/DefaultProcessor.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/simpledb/action/Action.java" afterPath="$PROJECT_DIR$/src/com/simpledb/action/Action.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/simpledb/action/ActionGET.java" afterPath="$PROJECT_DIR$/src/com/simpledb/action/ActionGET.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/simpledb/action/ActionSET.java" afterPath="$PROJECT_DIR$/src/com/simpledb/action/ActionSET.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/simpledb/writer/DefaultLogWriter.java" afterPath="$PROJECT_DIR$/src/com/simpledb/writer/DefaultLogWriter.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/simpledb/memtable/DefaultMemtable.java" afterPath="$PROJECT_DIR$/src/com/simpledb/memtable/DefaultMemtable.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/simpledb/memtable/Memtable.java" afterPath="$PROJECT_DIR$/src/com/simpledb/memtable/Memtable.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -51,8 +52,8 @@
       <file leaf-file-name="ActionSET.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/simpledb/action/ActionSET.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="25" column="0" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+            <state relative-caret-position="257">
+              <caret line="22" column="66" lean-forward="false" selection-start-line="22" selection-start-column="66" selection-end-line="22" selection-end-column="66" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -63,8 +64,8 @@
       <file leaf-file-name="Action.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/simpledb/action/Action.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="22" column="50" lean-forward="true" selection-start-line="22" selection-start-column="50" selection-end-line="22" selection-end-column="55" />
+            <state relative-caret-position="270">
+              <caret line="28" column="70" lean-forward="false" selection-start-line="28" selection-start-column="70" selection-end-line="28" selection-end-column="70" />
               <folding />
             </state>
           </provider>
@@ -73,8 +74,8 @@
       <file leaf-file-name="DefaultProcessor.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/simpledb/DefaultProcessor.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="77" column="33" lean-forward="true" selection-start-line="77" selection-start-column="33" selection-end-line="77" selection-end-column="33" />
+            <state relative-caret-position="249">
+              <caret line="86" column="55" lean-forward="false" selection-start-line="86" selection-start-column="55" selection-end-line="86" selection-end-column="55" />
               <folding />
             </state>
           </provider>
@@ -93,18 +94,18 @@
       <file leaf-file-name="DefaultMemtable.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/simpledb/memtable/DefaultMemtable.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="27" column="0" lean-forward="false" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+            <state relative-caret-position="2">
+              <caret line="11" column="43" lean-forward="true" selection-start-line="11" selection-start-column="43" selection-end-line="11" selection-end-column="43" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ActionGET.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ActionGET.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/simpledb/action/ActionGET.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="33" column="9" lean-forward="false" selection-start-line="33" selection-start-column="9" selection-end-line="33" selection-end-column="9" />
+            <state relative-caret-position="285">
+              <caret line="20" column="66" lean-forward="false" selection-start-line="20" selection-start-column="66" selection-end-line="20" selection-end-column="66" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -112,14 +113,12 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CompoundValidator.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/com/simpledb/validators/CompoundValidator.java">
+      <file leaf-file-name="Memtable.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/com/simpledb/memtable/Memtable.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="34" column="40" lean-forward="false" selection-start-line="34" selection-start-column="16" selection-end-line="34" selection-end-column="40" />
-              <folding>
-                <element signature="e#672#686#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="135">
+              <caret line="15" column="18" lean-forward="false" selection-start-line="15" selection-start-column="18" selection-end-line="15" selection-end-column="18" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -217,7 +216,6 @@
         <option value="$PROJECT_DIR$/SimpleDB.iml" />
         <option value="$PROJECT_DIR$/src/com/simpledb/writer/LogWriter.java" />
         <option value="$PROJECT_DIR$/src/com/simpledb/KeyValuePair.java" />
-        <option value="$PROJECT_DIR$/src/com/simpledb/memtable/Memtable.java" />
         <option value="$PROJECT_DIR$/src/com/simpledb/ExecutorContext.java" />
         <option value="$PROJECT_DIR$/src/com/simpledb/SimpleDB.java" />
         <option value="$PROJECT_DIR$/data/1503522742965" />
@@ -227,12 +225,13 @@
         <option value="$PROJECT_DIR$/src/com/simpledb/validators/QueryValidator.java" />
         <option value="$PROJECT_DIR$/src/com/simpledb/result/Result.java" />
         <option value="$PROJECT_DIR$/src/com/simpledb/SimpleDBTest.java" />
+        <option value="$PROJECT_DIR$/src/com/simpledb/writer/DefaultLogWriter.java" />
+        <option value="$PROJECT_DIR$/src/com/simpledb/action/ActionGET.java" />
+        <option value="$PROJECT_DIR$/src/com/simpledb/action/ActionSET.java" />
+        <option value="$PROJECT_DIR$/src/com/simpledb/action/Action.java" />
         <option value="$PROJECT_DIR$/src/com/simpledb/DefaultProcessor.java" />
         <option value="$PROJECT_DIR$/src/com/simpledb/memtable/DefaultMemtable.java" />
-        <option value="$PROJECT_DIR$/src/com/simpledb/writer/DefaultLogWriter.java" />
-        <option value="$PROJECT_DIR$/src/com/simpledb/action/Action.java" />
-        <option value="$PROJECT_DIR$/src/com/simpledb/action/ActionSET.java" />
-        <option value="$PROJECT_DIR$/src/com/simpledb/action/ActionGET.java" />
+        <option value="$PROJECT_DIR$/src/com/simpledb/memtable/Memtable.java" />
       </list>
     </option>
   </component>
@@ -453,8 +452,16 @@
       <workItem from="1503485128715" duration="3521000" />
       <workItem from="1503488718377" duration="121000" />
       <workItem from="1503488940527" duration="17210000" />
-      <workItem from="1503520110225" duration="17803000" />
+      <workItem from="1503520110225" duration="20154000" />
     </task>
+    <task id="LOCAL-00001" summary="LogWriter Now uses ByteBuffer to write out files.  Used to track position and also buffer data before writing to disk">
+      <created>1503574370278</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1503574370278</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -490,7 +497,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="55295000" />
+    <option name="totallyTimeSpent" value="57646000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="24" width="1680" height="1023" extended-state="6" />
@@ -530,6 +537,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="LogWriter Now uses ByteBuffer to write out files.  Used to track position and also buffer data before writing to disk" />
+    <option name="LAST_COMMIT_MESSAGE" value="LogWriter Now uses ByteBuffer to write out files.  Used to track position and also buffer data before writing to disk" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -781,14 +792,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpledb/memtable/Memtable.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="30" lean-forward="true" selection-start-line="0" selection-start-column="30" selection-end-line="0" selection-end-column="30" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpledb/SimpleDB.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="402">
@@ -837,14 +840,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
           <caret line="9" column="0" lean-forward="false" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpledb/memtable/DefaultMemtable.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="27" column="0" lean-forward="false" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -901,39 +896,55 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpledb/DefaultProcessor.java">
+    <entry file="file://$PROJECT_DIR$/src/com/simpledb/action/ActionGET.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="77" column="33" lean-forward="true" selection-start-line="77" selection-start-column="33" selection-end-line="77" selection-end-column="33" />
-          <folding />
+        <state relative-caret-position="285">
+          <caret line="20" column="66" lean-forward="false" selection-start-line="20" selection-start-column="66" selection-end-line="20" selection-end-column="66" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpledb/action/Action.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="22" column="50" lean-forward="true" selection-start-line="22" selection-start-column="50" selection-end-line="22" selection-end-column="55" />
+        <state relative-caret-position="270">
+          <caret line="28" column="70" lean-forward="false" selection-start-line="28" selection-start-column="70" selection-end-line="28" selection-end-column="70" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/simpledb/DefaultProcessor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="249">
+          <caret line="86" column="55" lean-forward="false" selection-start-line="86" selection-start-column="55" selection-end-line="86" selection-end-column="55" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/simpledb/action/ActionSET.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="25" column="0" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+        <state relative-caret-position="257">
+          <caret line="22" column="66" lean-forward="false" selection-start-line="22" selection-start-column="66" selection-end-line="22" selection-end-column="66" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/simpledb/action/ActionGET.java">
+    <entry file="file://$PROJECT_DIR$/src/com/simpledb/memtable/DefaultMemtable.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="33" column="9" lean-forward="false" selection-start-line="33" selection-start-column="9" selection-end-line="33" selection-end-column="9" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+        <state relative-caret-position="2">
+          <caret line="11" column="43" lean-forward="true" selection-start-line="11" selection-start-column="43" selection-end-line="11" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/simpledb/memtable/Memtable.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="15" column="18" lean-forward="false" selection-start-line="15" selection-start-column="18" selection-end-line="15" selection-end-column="18" />
+          <folding />
         </state>
       </provider>
     </entry>
