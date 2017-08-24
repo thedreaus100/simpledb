@@ -87,10 +87,15 @@ public class SimpleDBTest {
             boolean flag = true;
             int count = 0;
             int key = 0;
+            int size = 100;
             try {
                 Thread.sleep(0);
-                while (flag && count < 100) {
-                    String entry = String.format("SET: %s, %s\n", UUID.randomUUID().toString(), getRandomString(64));
+
+                //Want to force collisions so that our compaction can actually have something to compact!!
+                String[] uuids = generateUUIDS(size/2);
+                while (flag && count < size) {
+                    int uuidIndex = (int)Math.floor(Math.random() * (size/2));
+                    String entry = String.format("SET: %s, %s\n", uuidIndex, getRandomString(64));
                     System.out.print(entry);
                     pos.write(entry.getBytes());
                     count++;
@@ -114,5 +119,14 @@ public class SimpleDBTest {
         }
 
         return new String(chararray);
+    }
+
+    public static String[] generateUUIDS(int size){
+
+        String[] uuids = new String[size];
+        for(int i = 0; i< size; i++){
+            uuids[i] = UUID.randomUUID().toString();
+        }
+        return uuids;
     }
 }

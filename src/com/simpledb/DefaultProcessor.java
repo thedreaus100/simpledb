@@ -85,7 +85,6 @@ public class DefaultProcessor implements Runnable {
         String input = null;
         do{
             try{
-                System.out.print(":|\t");
                 input = scanner.nextLine();
                 if(input != null){
                     if(validator.validate(input)){
