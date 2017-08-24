@@ -22,10 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Stack;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.function.BiFunction;
 
 public class DefaultProcessor implements Runnable {
@@ -36,9 +33,12 @@ public class DefaultProcessor implements Runnable {
     private final LogWriter<String> writer;
     private Logger logger = LogManager.getRootLogger();
     private InputStream inputStream;
-    private final ExecutorService cacheService;
     private Map<String, Action<String>> actionMap;
     private final ConcurrentLinkedDeque<LookupIndex> indexStack;
+
+    //Executors
+    private final ExecutorService cacheService;
+    private final ScheduledExecutorService daemons;
 
     public DefaultProcessor(){
         this(System.in);
@@ -50,6 +50,7 @@ public class DefaultProcessor implements Runnable {
         this.memTable = new DefaultMemtable(writer);
         this.actionTokenizer = new ActionTokenizer();
         this.cacheService = Executors.newCachedThreadPool();
+        this.daemons = Executors.newScheduledThreadPool(2);
         this.validator = new CompoundValidator<String>(
                 actionTokenizer.getValidator()
                 //TODO: Add Max key size check
@@ -60,7 +61,9 @@ public class DefaultProcessor implements Runnable {
         this.indexStack = new ConcurrentLinkedDeque<LookupIndex>();
         registerActions(this.actionMap);
 
-        ExecutorContext.getInstance().register(cacheService);
+        ExecutorContext.getInstance()
+                .register(cacheService)
+                .register(daemons);
     }
 
     public void registerActions(Map<String, Action<String>> actionMap){
@@ -71,54 +74,63 @@ public class DefaultProcessor implements Runnable {
 
     public void run() {
 
+        //Main Thread
+        processActions();
+        daemons.scheduleAtFixedRate(manageMemtable(), 0, 500, TimeUnit.MILLISECONDS);
+    }
+
+    public void processActions(){
+
         Scanner scanner = new Scanner(this.inputStream);
         String input = null;
         do{
-           try{
-               System.out.print(":|\t");
-               input = scanner.nextLine();
-               if(input != null){
-                   if(validator.validate(input)){
-                       KeyValuePair<String> queryPair = this.actionTokenizer.tokenize(input);
-                       Action<String> action = actionMap.get(queryPair.getKey().toUpperCase());
-                       //TODO: Need to refactor KeyValuePair CAST isn't good!
+            try{
+                System.out.print(":|\t");
+                input = scanner.nextLine();
+                if(input != null){
+                    if(validator.validate(input)){
+                        KeyValuePair<String> queryPair = this.actionTokenizer.tokenize(input);
+                        Action<String> action = actionMap.get(queryPair.getKey().toUpperCase());
+                        //TODO: Need to refactor KeyValuePair CAST isn't good!
 
-                       Future<Result> futureResult = cacheService.submit(
-                               action.execute(memTable, (String) queryPair.getValue())
-                       );
+                        Future<Result> futureResult = cacheService.submit(
+                                action.execute(memTable, (String) queryPair.getValue())
+                        );
+                    }else{
+                        System.out.println("Invalid Input");
+                    }
+                }else{
+                    Thread.sleep(500);
+                }
+            }catch(Exception e){
 
-                       logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
-                       if(memTable.isFull()){
-                            this.cacheService.submit(dump(writer, memTable));
-                            memTable = new DefaultMemtable(writer);
-                       }
-                   }else{
-                       System.out.println("Invalid Input");
-                   }
-               }else{
-                   Thread.sleep(500);
-               }
-           }catch(Exception e){
-
-               e.printStackTrace();
-               logger.warn(e.getMessage());
-           }
+                e.printStackTrace();
+                logger.warn(e.getMessage());
+            }
         }while(true);
+    }
+
+    public Runnable manageMemtable(){
+
+        return ()->{
+            //Place Lock on writing to memtable here!!!! nothing should be able to write anything while this is going on!!
+            logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
+            if(memTable.isFull()){
+                this.cacheService.submit(dump(writer, memTable));
+                memTable = new DefaultMemtable(writer);
+            }
+        };
     }
 
     public Runnable dump(final LogWriter<String> writer, final Memtable<String> memTable){
 
-        return new Runnable(){
-
-            @Override
-            public void run() {
-                LookupIndex index = null;
-                try {
-                    index = writer.dump(memTable);
-                    System.out.println(index);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        return ()->{
+            LookupIndex index = null;
+            try {
+                index = writer.dump(memTable);
+                System.out.println(index);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         };
     }

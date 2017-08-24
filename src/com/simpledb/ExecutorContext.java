@@ -23,9 +23,10 @@ public class ExecutorContext {
         }
     }
 
-    public void register(ExecutorService service){
+    public ExecutorContext register(ExecutorService service){
 
         services.add(service);
+        return this;
     }
 
     public List<ExecutorService> getExecutorServices(){
