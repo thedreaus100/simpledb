@@ -104,7 +104,7 @@ public class DefaultProcessor implements Runnable {
 
     public void run() {
 
-        daemons.scheduleAtFixedRate(manageMemtable(), 0, 1000, TimeUnit.MILLISECONDS);
+        daemons.scheduleAtFixedRate(manageMemtable(), 0, 100, TimeUnit.MILLISECONDS);
 
         //Main Thread
         processActions();
@@ -171,8 +171,8 @@ public class DefaultProcessor implements Runnable {
 
         return ()->{
             //Place Lock on writing to memtable here!!!! nothing should be able to write anything while this is going on!!
-            logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
             if(memTable.isFull()){
+                logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
                 this.cacheService.submit(dump(writer, memTable));
                 memTable = new DefaultMemtable(writer);
             }
