@@ -38,12 +38,14 @@ public class ActionSET extends Action<String> {
                 //should replace with Reeantract Lock
                 synchronized (this){
                     while((memtable = processor.getMemTable()) == null || memtable.isFull()){
+                        System.out.println("FULL WAITING....");
                         try{
                             wait();
                         }catch(InterruptedException e){}
                         finally{
                             memtable = processor.getMemTable();
                         }
+                        System.out.println("RESUMING...");
                     }
                 }
 

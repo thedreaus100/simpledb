@@ -77,6 +77,7 @@ public class DefaultLogWriter implements LogWriter<String> {
 
        if(shouldLock){
            Lock lock = readWriteLock.readLock();
+           lock.lock();
            try{
                return _dump(memtable);
            }finally{

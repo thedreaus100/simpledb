@@ -181,19 +181,23 @@ public class DefaultProcessor extends Processor<String> {
 
         return ()->{
             Lock lock = memtableLock.readLock();
+            lock.lock();
             try{
                 if(memTable.isFull()){
+                    System.out.println("MEMTABLE FULL INITATING DUMP: ");
                     logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
                     this.cacheService.submit(dump(writer, memTable));
 
                     //No other writes should be allowed to the Memtable now.
                     memTable.dumped();
                     memTable = new DefaultMemtable(memtableLock, writer);
+
+                    //lets threads know a new memtable is available.
+                    notifyAll();
                 }
             }finally{
                 lock.unlock();
                 //notifies Threads that are blocked because of a Full Memtable
-                notifyAll();
             }
         };
     }

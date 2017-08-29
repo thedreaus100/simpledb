@@ -42,6 +42,7 @@ public class DefaultMemtable implements Memtable<String> {
        if(!dumped){
            //blocks as long as nothing else is concurrently writing... and there are no ongoing reads
            Lock lock = readWriteLock.writeLock();
+           lock.lock();
            try{
                cacheMap.put(keyValuePair.getKey(), keyValuePair.getValue());
            }finally{
