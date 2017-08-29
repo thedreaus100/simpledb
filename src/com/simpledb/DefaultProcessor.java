@@ -7,9 +7,7 @@ import com.simpledb.index.LookupIndex;
 import com.simpledb.memtable.DefaultMemtable;
 import com.simpledb.memtable.Memtable;
 import com.simpledb.result.Result;
-import com.simpledb.tokenizer.ActionSETTokenizer;
 import com.simpledb.tokenizer.ActionTokenizer;
-import com.simpledb.tokenizer.Tokenizer;
 import com.simpledb.validators.CompoundValidator;
 import com.simpledb.writer.DefaultLogWriter;
 import com.simpledb.writer.LogWriter;
@@ -23,17 +21,19 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Stack;
 import java.util.concurrent.*;
-import java.util.function.BiFunction;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class DefaultProcessor implements Runnable {
+public class DefaultProcessor extends Processor<String> {
 
     //Core
     private Memtable<String> memTable;
     private final ConcurrentLinkedDeque<LookupIndex> indexStack;
     private final LogWriter<String> writer;
     private final ClientType clientType;
+    private ReadWriteLock memtableLock;
 
     //Executors
     private final ExecutorService cacheService;
@@ -74,8 +74,9 @@ public class DefaultProcessor implements Runnable {
     public DefaultProcessor(ClientType clientType, InputStream in, OutputStream out){
 
         this.clientType = clientType;
-        this.writer = new DefaultLogWriter();
-        this.memTable = new DefaultMemtable(writer);
+        this.memtableLock = new ReentrantReadWriteLock(true);
+        this.writer = new DefaultLogWriter(this.memtableLock);
+        this.memTable = new DefaultMemtable(memtableLock, writer);
         this.actionTokenizer = new ActionTokenizer();
         this.cacheService = Executors.newCachedThreadPool();
         this.daemons = Executors.newScheduledThreadPool(2);
@@ -98,8 +99,13 @@ public class DefaultProcessor implements Runnable {
 
     public void registerActions(Map<String, Action<String>> actionMap){
 
-        actionMap.put("SET", new ActionSET(this.outputStream));
-        actionMap.put("GET", new ActionGET(indexStack, this.outputStream));
+        actionMap.put("SET", new ActionSET(this, this.outputStream));
+        actionMap.put("GET", new ActionGET(this, indexStack, this.outputStream));
+    }
+
+    @Override
+    public Memtable<String> getMemTable(){
+        return this.memTable;
     }
 
     public void run() {
@@ -126,12 +132,14 @@ public class DefaultProcessor implements Runnable {
                         //TODO: Need to refactor KeyValuePair CAST isn't good!
 
                         Future<Result> futureResult = cacheService.submit(
-                                action.execute(memTable, (String) queryPair.getValue())
+                                action.execute((String) queryPair.getValue())
                         );
 
 
                         /*
                             Force Blocking for Actions if the Client is a Human
+
+                            ...what if we have multiple clients?
                          */
                         if(this.clientType.equals(ClientType.CMD)){
                             Result result = futureResult.get(10, TimeUnit.SECONDS);
@@ -162,23 +170,37 @@ public class DefaultProcessor implements Runnable {
     }
 
     /*
-        Frequentally check the size of the memtable to see if its full if it is full... block subsequent writes
-        to the memtable, then spawn a process to dump the memtable to file.
+        Frequentally check the size of the memtable to see if its full.
 
-        ideally this would only need to run if the db is actively being written too.
+        wait until all threads currently writing to the Memtable are done... then obtain a lock
+        and dump this to a file.
+
+        needs lock because I want to ensure that no other Threads can add to the Memtable before dump is executed
      */
     public Runnable manageMemtable(){
 
         return ()->{
-            //Place Lock on writing to memtable here!!!! nothing should be able to write anything while this is going on!!
-            if(memTable.isFull()){
-                logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
-                this.cacheService.submit(dump(writer, memTable));
-                memTable = new DefaultMemtable(writer);
+            Lock lock = memtableLock.readLock();
+            try{
+                if(memTable.isFull()){
+                    logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
+                    this.cacheService.submit(dump(writer, memTable));
+
+                    //No other writes should be allowed to the Memtable now.
+                    memTable.dumped();
+                    memTable = new DefaultMemtable(memtableLock, writer);
+                }
+            }finally{
+                lock.unlock();
+                //notifies Threads that are blocked because of a Full Memtable
+                notifyAll();
             }
         };
     }
 
+    /*
+        Doesn't need a lock because logically speaking nothing else should be able to continue writing to the dump while this is happening
+     */
     public Runnable dump(final LogWriter<String> writer, final Memtable<String> memTable){
 
         return ()->{

@@ -12,6 +12,7 @@ public interface Memtable<K> {
 
     public void insert(KeyValuePair<K> keyValuePair);
     public int getSize();
+    public void dumped();
     public boolean isFull();
-    public ConcurrentSkipListMap<K, Serializable> getMap();
+    public TreeMap<K, Serializable> getMap();
 }

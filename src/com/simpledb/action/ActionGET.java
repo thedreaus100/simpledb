@@ -1,5 +1,6 @@
 package com.simpledb.action;
 
+import com.simpledb.Processor;
 import com.simpledb.index.LookupIndex;
 import com.simpledb.memtable.Memtable;
 import com.simpledb.result.Result;
@@ -12,23 +13,27 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class ActionGET extends  Action<String>{
 
     private final ConcurrentLinkedDeque<LookupIndex> indexStack;
-    public ActionGET(ConcurrentLinkedDeque<LookupIndex> indexStack, OutputStream out){
+    public ActionGET(Processor processor, ConcurrentLinkedDeque<LookupIndex> indexStack, OutputStream out){
 
-        super(null, out);
+        super(processor,null, out);
         this.indexStack = indexStack;
     }
 
     @Override
-    protected Callable<Result> _execute(Memtable<String> memtable, String input) {
+    protected Callable<Result> _execute(String input) {
 
        return new Callable<Result>(){
 
            @Override
+           /*
+                Don't really care about thread safety here for now
+            */
            public Result call() throws Exception {
+
+               Memtable<String> memtable = processor.getMemTable();
                Object value = memtable.getMap().get(input.trim());
                Result result = null;
                if(value != null){
-
                    result = new Result(value.toString());
                }else{
 

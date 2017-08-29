@@ -1,6 +1,7 @@
 package com.simpledb.action;
 
 import com.simpledb.KeyValuePair;
+import com.simpledb.Processor;
 import com.simpledb.index.LookupIndex;
 import com.simpledb.memtable.Memtable;
 import com.simpledb.result.Result;
@@ -15,13 +16,13 @@ import java.util.concurrent.ExecutorService;
 
 public class ActionSET extends Action<String> {
 
-    public ActionSET(OutputStream out){
+    public ActionSET(Processor processor, OutputStream out){
 
-        super(new ActionSETTokenizer(), out);
+        super(processor, new ActionSETTokenizer(), out);
     }
 
     @Override
-    protected Callable<Result> _execute(Memtable<String> memtable, String input) {
+    protected Callable<Result> _execute(String input) {
 
         return new Callable<Result>(){
 
@@ -29,8 +30,23 @@ public class ActionSET extends Action<String> {
             @Override
             public Result call() throws Exception {
 
-                Result result = null;
                 KeyValuePair<String> keyValuePair = tokenizer.tokenize(input);
+                Memtable<String> memtable = null;
+                Result result = null;
+
+                //block until it has access to non-full Memtable.
+                //should replace with Reeantract Lock
+                synchronized (this){
+                    while((memtable = processor.getMemTable()) == null || memtable.isFull()){
+                        try{
+                            wait();
+                        }catch(InterruptedException e){}
+                        finally{
+                            memtable = processor.getMemTable();
+                        }
+                    }
+                }
+
                 memtable.insert(keyValuePair);
                 result = new Result(String.format("INSERTED:\t%s", keyValuePair));
                 outputResult(result);

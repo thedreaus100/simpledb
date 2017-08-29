@@ -9,6 +9,8 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 
 public class DefaultLogWriter implements LogWriter<String> {
 
@@ -16,18 +18,20 @@ public class DefaultLogWriter implements LogWriter<String> {
     private final char keyValuePairDelimiter;
     private final Charset encoding;
     private String dirname;
+    protected ReadWriteLock readWriteLock;
 
-    public DefaultLogWriter(String dirname){
+    public DefaultLogWriter(ReadWriteLock readWriteLock, String dirname){
 
         this.fieldDelimiter = ';';
         this.keyValuePairDelimiter = ',';
         this.dirname = dirname;
+        this.readWriteLock = readWriteLock;
         encoding = StandardCharsets.UTF_8;
     }
 
-    public DefaultLogWriter(){
+    public DefaultLogWriter(ReadWriteLock readWriteLock){
 
-        this("." + File.separator + "data");
+        this(readWriteLock, "." + File.separator + "data");
     }
 
     @Override
@@ -63,10 +67,14 @@ public class DefaultLogWriter implements LogWriter<String> {
         }
     }
 
+    /*
+        Be careful that nothing else can write to this Memtable while this operation is going on.
+     */
     @Override
     public LookupIndex dump(Memtable<String> memtable) throws IOException {
 
         //LookUpIndex {file_name, Map[{"allison": 0},"cathy":"256"....]
+        Lock lock = readWriteLock.readLock();
         String fileName = this.dirname + File.separator + DateTime.now().getMillis();
         File file = new File(fileName);
         try(FileOutputStream fos = new FileOutputStream(file);

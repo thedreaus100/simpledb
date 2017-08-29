@@ -1,31 +1,30 @@
 package com.simpledb.action;
 
-import com.simpledb.index.LookupIndex;
+import com.simpledb.Processor;
 import com.simpledb.memtable.Memtable;
 import com.simpledb.result.Result;
 import com.simpledb.tokenizer.Tokenizer;
-import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import java.io.*;
-import java.util.Stack;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 public abstract class Action<K> {
 
     protected Tokenizer<K> tokenizer;
     protected OutputStream out;
+    protected final Processor processor;
 
-    public Action(Tokenizer<K> tokenizer, OutputStream out){
+    public Action(Processor processor, Tokenizer<K> tokenizer, OutputStream out){
 
         this.tokenizer = tokenizer;
         this.out = out;
+        this.processor = processor;
     }
 
-    public Callable<Result> execute(Memtable<K> memtable, K input) throws InvalidInputException {
+    public Callable<Result> execute(K input) throws InvalidInputException {
 
         if(this.tokenizer == null || this.tokenizer.getValidator().validate(input)){
-           return  _execute(memtable, input);
+           return  _execute(input);
         }else{
             throw new InvalidInputException("Invalid Input");
         }
@@ -44,5 +43,5 @@ public abstract class Action<K> {
         }
     }
 
-    protected abstract Callable<Result> _execute(Memtable<K> memtable, K input);
+    protected abstract Callable<Result> _execute(K input);
 }

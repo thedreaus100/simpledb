@@ -8,42 +8,62 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DefaultMemtable implements Memtable<String> {
 
-    private ConcurrentSkipListMap<String, Serializable> cacheMap;
+    private TreeMap<String, Serializable> cacheMap;
     private int maxSize;
-    private int size = 0;
+    private AtomicInteger size;
     private final LogWriter<String> writer;
+    protected  ReadWriteLock readWriteLock;
+    protected boolean dumped = false;
 
-    public DefaultMemtable(LogWriter<String> writer){
+    public DefaultMemtable(ReadWriteLock readWriteLock, LogWriter<String> writer){
 
+        this.readWriteLock = readWriteLock;
         this.writer = writer;
-        cacheMap = new ConcurrentSkipListMap<String, Serializable>();
+        size = new AtomicInteger(0);
+        cacheMap = new TreeMap<String, Serializable>();
         maxSize = 1024;
     }
 
     @Override
-    public void insert(KeyValuePair<String> keyValuePair) {
-        cacheMap.put(keyValuePair.getKey(), keyValuePair.getValue());
+    public void dumped(){
+        this.dumped = true;
+    }
 
-        synchronized (this){
-            size += writer.calculateSpace(keyValuePair);
-        }
+    @Override
+    public void insert(KeyValuePair<String> keyValuePair) {
+
+       if(!dumped){
+           //blocks as long as nothing else is concurrently writing... and there are no ongoing reads
+           Lock lock = readWriteLock.writeLock();
+           try{
+               cacheMap.put(keyValuePair.getKey(), keyValuePair.getValue());
+           }finally{
+               //don't want to block while calculating used space
+               size.addAndGet(writer.calculateSpace(keyValuePair));
+               lock.unlock();
+           }
+       }
     }
 
     @Override
     public int getSize() {
-        return size;
+        return size.get();
     }
 
     @Override
-    public boolean isFull() {
-        return size >= maxSize;
+    public synchronized boolean isFull() {
+        return size.get() >= maxSize;
     }
 
     @Override
-    public ConcurrentSkipListMap<String, Serializable> getMap() {
+    public TreeMap<String, Serializable> getMap() {
 
         return cacheMap;
     }

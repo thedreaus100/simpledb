@@ -7,6 +7,7 @@ I will create a real README later for now this is essentially a todo list
 currently they're are two ways input is inputted into the system
 
 1 - CMD (command line)
+
 2 - API
 
 depending on the type used the system processes input slightly differently
