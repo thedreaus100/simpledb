@@ -2,7 +2,7 @@
 
 I will create a real README later for now this is essentially a todo list
 
-**Problem**
+~~**Problem**~~
 
 currently they're are two ways input is inputted into the system
 
@@ -28,14 +28,38 @@ the idea here is that once the memtable fills up it should dump it to a log:
     2) the daemon for manageMemtable runs frequentally but not necessarily fast enough to keep up w/ the writes
        therefore
        
-**Solution:**
+~~**Solution:**~~
 
 Add a ReentrantReadWriteLock to the system that locks prioritizes GET ACTIONS
 and blocks SET ACTION when there is a GET request or the manageMemtable daemon is
 running.
 
 Also after the system is full... the SET CMDS should block until the manageMemtable daemon completes
-this way the manage memtable daemon doesn't have to race the SET ACTIONS
+this way the manage memtable daemon doesn't have to race the SET ACTIONS~~
+
+
+Fixed:
+
+Added ReentrantReadLock that manages Memtable inserts && the memtable Manager Thread
+which persists logs.  
+
+Reverted back to TreeMap since the ReeantrantReadWriteLock was added.
+
+SET Actions will also block once the memtable is full.
+
+Once a dump is initiated the SET threads are then allowed to resume.
+
+**Problem**
+
+The Memtable manager runs periodically every 100 seconds.  If the memtable
+becomes full during this time the system will then block any futher writes.
+
+This creates an issue because essentially for 100 seconds writes will be blocked unnecessarily.
+
+**Solution**
+
+Allow SET Actions to interrupt the Memtable manager threads timeout, which should then force the system to check to see
+if the memtable is full.
 
 **Problem**
 
