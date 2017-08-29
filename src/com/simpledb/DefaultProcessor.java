@@ -206,7 +206,7 @@ public class DefaultProcessor extends Processor<String> {
         return ()->{
             LookupIndex index = null;
             try {
-                index = writer.dump(memTable);
+                index = writer.dump(memTable, false);
                 System.out.println(index);
             } catch (IOException e) {
                 e.printStackTrace();

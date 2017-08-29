@@ -69,12 +69,26 @@ public class DefaultLogWriter implements LogWriter<String> {
 
     /*
         Be careful that nothing else can write to this Memtable while this operation is going on.
+
+
      */
     @Override
-    public LookupIndex dump(Memtable<String> memtable) throws IOException {
+    public LookupIndex dump(Memtable<String> memtable, boolean shouldLock) throws IOException {
 
-        //LookUpIndex {file_name, Map[{"allison": 0},"cathy":"256"....]
-        Lock lock = readWriteLock.readLock();
+       if(shouldLock){
+           Lock lock = readWriteLock.readLock();
+           try{
+               return _dump(memtable);
+           }finally{
+               lock.unlock();
+           }
+       }else{
+           return _dump(memtable);
+       }
+    }
+
+    public LookupIndex _dump(Memtable<String> memtable) throws IOException {
+
         String fileName = this.dirname + File.separator + DateTime.now().getMillis();
         File file = new File(fileName);
         try(FileOutputStream fos = new FileOutputStream(file);

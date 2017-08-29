@@ -9,5 +9,5 @@ import java.io.IOException;
 public interface LogWriter<K> {
 
     public int calculateSpace(KeyValuePair<K> keyValuePair);
-    public LookupIndex dump(final Memtable<K> memtable) throws IOException;
+    public LookupIndex dump(final Memtable<K> memtable, boolean shouldLock) throws IOException;
 }
