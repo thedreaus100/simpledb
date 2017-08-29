@@ -101,7 +101,7 @@ public class SimpleDBTest {
                 String[] uuids = generateUUIDS(size/2);
                 while (flag && count < size) {
                     int uuidIndex = (int)Math.floor(Math.random() * (size/2));
-                    String entry = String.format("SET: %s, %s\n", uuidIndex, getRandomString(64));
+                    String entry = String.format("SET: %s, %s\n", uuids[uuidIndex], getRandomString(64));
                     System.out.print(entry);
                     pos.write(entry.getBytes());
                     count++;
