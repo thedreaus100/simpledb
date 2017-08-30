@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -18,7 +19,7 @@ public class DefaultMemtable implements Memtable<String> {
     private AtomicLong size;
     private final LogWriter<String> writer;
     protected  ReentrantReadWriteLock.WriteLock writeLock;
-    protected boolean dumped = false;
+    protected AtomicBoolean dumped;
 
     //Log
     private Logger logger = LogManager.getRootLogger();
@@ -27,15 +28,16 @@ public class DefaultMemtable implements Memtable<String> {
 
         this.writeLock = writeLock;
         this.writer = writer;
-        size = new AtomicLong(0);
-        cacheMap = new TreeMap<String, Serializable>();
-        maxSize = 1024 * 10;
-        maxBlockSize = 1024;
+        this.size = new AtomicLong(0);
+        this.cacheMap = new TreeMap<String, Serializable>();
+        this.maxSize = 1024 * 50;
+        this.maxBlockSize = 1024;
+        this.dumped = new AtomicBoolean(false);
     }
 
     @Override
     public void dumped(){
-        this.dumped = true;
+        this.dumped.getAndSet(true);
     }
 
     @Override
@@ -48,7 +50,7 @@ public class DefaultMemtable implements Memtable<String> {
        try{
            if(this.isFull()){
                throw new MemtableFullException();
-           }else if(this.dumped){
+           }else if(this.dumped.get()){
                throw new MemtableDumpedException();
            }
            cacheMap.put(keyValuePair.getKey(), keyValuePair.getValue());
@@ -83,7 +85,7 @@ public class DefaultMemtable implements Memtable<String> {
     }
 
     @Override
-    public synchronized boolean isFull() {
+    public boolean isFull() {
         return size.get() >= maxSize;
     }
 
