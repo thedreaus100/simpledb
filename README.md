@@ -3,7 +3,7 @@
 
 **Description**
 
-SimpleDB is as its name suggests a simple database.  Its implemented using an
+SimpleDB is as its name suggests a simple database.  Its implemented using a
 LSM strategy, meaning that SimpleDB writes and retrieves keys from in-memory (memtable)
 then periodically dumps this data to disk once it gets past a certain threshold.
 
