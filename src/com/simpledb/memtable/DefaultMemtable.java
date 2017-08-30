@@ -33,7 +33,7 @@ public class DefaultMemtable implements Memtable<String> {
         this.writer = writer;
         size = new AtomicInteger(0);
         cacheMap = new TreeMap<String, Serializable>();
-        maxSize = 1024;
+        maxSize = 1024 * 10;
     }
 
     @Override

@@ -127,7 +127,7 @@ public class DefaultProcessor extends Processor<String> {
 
     public void run() {
 
-       memtableManagerService.submit(manageMemtable(10000));
+       memtableManagerService.submit(manageMemtable(5000));
         //Main Thread
         processActions();
     }

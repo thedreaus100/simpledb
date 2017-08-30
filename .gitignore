@@ -1,5 +1,5 @@
 data/
-idea/
+.idea/
 target/
 logs/
-SipmleDB.iml
+SipmleDB.iml.idea/
