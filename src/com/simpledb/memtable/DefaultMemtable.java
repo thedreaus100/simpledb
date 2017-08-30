@@ -14,8 +14,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class DefaultMemtable implements Memtable<String> {
 
     private TreeMap<String, Serializable> cacheMap;
-    private int maxSize;
-    private AtomicInteger size;
+    protected long maxSize;
+    protected long maxBlockSize;
+    private AtomicLong size;
     private final LogWriter<String> writer;
     protected  ReentrantReadWriteLock.WriteLock writeLock;
     protected boolean dumped = false;
@@ -27,9 +28,10 @@ public class DefaultMemtable implements Memtable<String> {
 
         this.writeLock = writeLock;
         this.writer = writer;
-        size = new AtomicInteger(0);
+        size = new AtomicLong(0);
         cacheMap = new TreeMap<String, Serializable>();
-        maxSize = 1024;
+        maxSize = 1024 * 10;
+        maxBlockSize = 1024;
     }
 
     @Override
@@ -54,8 +56,26 @@ public class DefaultMemtable implements Memtable<String> {
     }
 
     @Override
-    public int getSize() {
+    public long getSize() {
         return size.get();
+    }
+
+    @Override
+    public long getMaxSize() {
+        return maxSize;
+    }
+
+    public void setMaxSize(long maxSize) {
+        this.maxSize = maxSize;
+    }
+
+    @Override
+    public long getMaxBlockSize() {
+        return maxBlockSize;
+    }
+
+    public void setMaxBlockSize(long maxBlockSize) {
+        this.maxBlockSize = maxBlockSize;
     }
 
     @Override

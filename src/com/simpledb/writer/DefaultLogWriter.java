@@ -8,9 +8,11 @@ import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.io.*;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DefaultLogWriter implements LogWriter<String> {
@@ -101,35 +103,50 @@ public class DefaultLogWriter implements LogWriter<String> {
             ObjectOutputStream oos = new ObjectOutputStream(bos)){
 
             long pos = 0;
-            ByteBuffer buffer = ByteBuffer.allocate(memtable.getSize());
-            long partionSize = memtable.getSize()/4;
-            for(String key:memtable.getMap().navigableKeySet()){
+            ByteBuffer buffer = ByteBuffer
+                    .allocate(memtable.getMaxBlockSize() <= Integer.MAX_VALUE ? (int)memtable.getMaxBlockSize(): Integer.MAX_VALUE);
 
-                Serializable value = memtable.getMap().get(key);
-                buffer.put(getBytes(key));
-                buffer.putChar(keyValuePairDelimiter);
-                buffer.put(getBytes((String) value)); //will add unnecessary space
-                buffer.putChar(this.fieldDelimiter);
+            Iterator<String> memtableKeys = memtable.getMap().navigableKeySet().iterator();
+            String key = memtableKeys.next();
+            int bytesRead = 0;
+            do{
+                try{
+                    Serializable value = memtable.getMap().get(key);
+                    buffer.put(getBytes(key));
+                    buffer.putChar(keyValuePairDelimiter);
+                    buffer.put(getBytes((String) value)); //will add unnecessary space
+                    buffer.putChar(this.fieldDelimiter);
 
-                if(buffer.position() >= partionSize){
-
-                    pos += buffer.position();
+                    //Only want to go to the next key if everything was successfully written otherwise rewrite to the next block.
+                    key = memtableKeys.next();
+                }catch(BufferOverflowException e){
+                    System.out.println("BUFFER OVERFLOW");
+                    pos += emptyBuffer(bos, buffer);
                     logger.debug("File POSTION: " + pos);
-                    buffer.flip();
-
-                    //Find class to do this more effeciently don't want to write one byte at a time
-                    while(buffer.hasRemaining()){
-                        bos.write(buffer.get());
-                    }
-                    buffer.flip();
                 }
-            }
+            }while(memtableKeys.hasNext());
 
             return null;
         }catch(IOException e){
 
-            e.printStackTrace();
+            logger.debug("Error", e);
             throw e;
         }
+    }
+
+    /*
+        Returns position at the start of the write.
+     */
+    public long emptyBuffer(OutputStream out, ByteBuffer buffer) throws IOException {
+
+        long pos = buffer.position();
+        buffer.flip();
+
+        //Find class to do this more effeciently don't want to write one byte at a time
+        while(buffer.hasRemaining()){
+            out.write(buffer.get());
+        }
+        buffer.flip();
+        return pos;
     }
 }

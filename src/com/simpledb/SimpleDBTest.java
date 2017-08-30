@@ -96,7 +96,7 @@ public class SimpleDBTest {
             boolean flag = true;
             int count = 0;
             int key = 0;
-            int size = 100;
+            int size = 1000;
             try {
                 Thread.sleep(0);
 

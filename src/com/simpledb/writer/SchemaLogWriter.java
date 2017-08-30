@@ -5,13 +5,10 @@ import com.simpledb.index.DefaultLookUpIndex;
 import com.simpledb.index.LookupIndex;
 import com.simpledb.memtable.Memtable;
 import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericData;
-import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DatumWriter;
 import org.joda.time.DateTime;
 
@@ -56,7 +53,7 @@ public class SchemaLogWriter implements LogWriter<String>{
 
         LookupIndex index = new DefaultLookUpIndex(file);
         //refactor!
-        int maxBlockSize = memtable.getSize()/4;
+        long maxBlockSize = memtable.getSize()/4;
         try(DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter)){
             dataFileWriter.create(schema, file);
             int i = 0;
