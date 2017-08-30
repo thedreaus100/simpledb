@@ -11,6 +11,7 @@ import com.simpledb.tokenizer.ActionTokenizer;
 import com.simpledb.validators.CompoundValidator;
 import com.simpledb.writer.DefaultLogWriter;
 import com.simpledb.writer.LogWriter;
+import com.simpledb.writer.SchemaLogWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -81,7 +82,8 @@ public class DefaultProcessor extends Processor<String> {
         this.readWriteLock = new ReentrantReadWriteLock(true);
         this.memtableReadLock = readWriteLock.readLock();
         this.memtableWriteLock = readWriteLock.writeLock();
-        this.writer = new DefaultLogWriter(this.memtableReadLock);
+        //this.writer = new DefaultLogWriter(this.memtableReadLock);
+        this.writer = new SchemaLogWriter();
         this.memTable = new DefaultMemtable(memtableWriteLock, writer);
         this.actionTokenizer = new ActionTokenizer();
         this.cacheService = Executors.newCachedThreadPool();
@@ -127,7 +129,8 @@ public class DefaultProcessor extends Processor<String> {
 
     public void run() {
 
-       memtableManagerService.submit(manageMemtable(5000));
+        logger.debug("\n\nSIMPLE DB\n\n");
+        memtableManagerService.submit(manageMemtable(5000));
         //Main Thread
         processActions();
     }
@@ -201,15 +204,16 @@ public class DefaultProcessor extends Processor<String> {
                    memtableReadLock.lock();
                    try{
                        if(memTable.isFull()){
-                           //logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
-                           logger.debug("Memtable full initating dump!!!");
-                           this.cacheService.submit(dump(writer, memTable));
-                           //No other writes should be allowed to the Memtable now.
-                           memTable.dumped();
-                           memTable = new DefaultMemtable(memtableWriteLock, writer);
-
                            //lets threads know a new memtable is available.
+                           //Needs to be synchronized to avoid
                            synchronized (this) {
+                               //No other writes should be allowed to the Memtable now.
+                               logger.debug("Memtable full initating dump!!!");
+                               this.cacheService.submit(dump(writer, memTable));
+
+                               memTable.dumped();
+                               memTable = new DefaultMemtable(memtableWriteLock, writer);
+
                                logger.debug("NOTIFIYING DUMP COMPLETION");
                                notifyAll();
                                logger.debug("DUMP COMPLETE!");

@@ -1,0 +1,9 @@
+{"namespace": "default.avro",
+  "type": "record",
+  "name": "Default",
+  "fields": [
+    {"name": "key", "type": "string"},
+    {"name": "value",  "type": "string"},
+    {"name": "timestamp", "type": "long"}
+  ]
+}

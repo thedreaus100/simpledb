@@ -2,6 +2,7 @@ package com.simpledb;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -90,10 +91,12 @@ public class SimpleDBTest {
     public static Thread fillSimpleDB(final PipedInputStream pis, final PipedOutputStream pos){
 
         return new Thread(() -> {
+
+            long startTime = DateTime.now().getMillis();
             boolean flag = true;
             int count = 0;
             int key = 0;
-            int size = 1000;
+            int size = 100;
             try {
                 Thread.sleep(0);
 
@@ -107,6 +110,8 @@ public class SimpleDBTest {
                     count++;
                     Thread.sleep(0);
                 }
+
+                System.out.println("TIME: " + ((double)(DateTime.now().getMillis() - startTime)/1000.00));
             } catch (InterruptedException e) {
                 System.out.println("INTERUPPTED");
                 flag = false;

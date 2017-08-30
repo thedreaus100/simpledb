@@ -11,16 +11,14 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DefaultLogWriter implements LogWriter<String> {
 
-    private final char fieldDelimiter;
-    private final char keyValuePairDelimiter;
-    private final Charset encoding;
-    private String dirname;
+    protected final char fieldDelimiter;
+    protected final char keyValuePairDelimiter;
+    protected Charset encoding;
+    protected String dirname;
     protected ReentrantReadWriteLock.ReadLock readLock;
 
     //Log
@@ -104,7 +102,7 @@ public class DefaultLogWriter implements LogWriter<String> {
 
             long pos = 0;
             ByteBuffer buffer = ByteBuffer.allocate(memtable.getSize());
-            int partionSize = memtable.getSize()/4;
+            long partionSize = memtable.getSize()/4;
             for(String key:memtable.getMap().navigableKeySet()){
 
                 Serializable value = memtable.getMap().get(key);
