@@ -1,6 +1,7 @@
 package com.simpledb.writer;
 
 import com.simpledb.KeyValuePair;
+import com.simpledb.index.DefaultLookUpIndex;
 import com.simpledb.index.LookupIndex;
 import com.simpledb.memtable.Memtable;
 import org.apache.avro.Schema;
@@ -53,18 +54,35 @@ public class SchemaLogWriter implements LogWriter<String>{
         File file = new File(this.dataDir + File.separator + String.format("%s.avro", DateTime.now().getMillis()));
         DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<GenericRecord>(schema);
 
+        LookupIndex index = new DefaultLookUpIndex(file);
+        //refactor!
+        int maxBlockSize = memtable.getSize()/4;
         try(DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter)){
             dataFileWriter.create(schema, file);
+            int i = 0;
+            long blockSize = 0;
+            long pos = 0;
             for(String key:memtable.getMap().navigableKeySet()){
 
+                if(i == 0){
+                    index.insertKey(key, 0);
+                }else if(blockSize >= maxBlockSize){
+
+                    index.insertKey(key, pos);
+                    blockSize = 0;
+                }
                 GenericRecord record = new GenericData.Record(schema);
                 record.put("key", key);
                 record.put("value", memtable.getMap().get(key).toString());
                 record.put("timestamp", DateTime.now().getMillis());
 
                 dataFileWriter.append(record);
+                long currentPosition = dataFileWriter.sync();
+                blockSize += (currentPosition - pos);
+                pos = currentPosition;
+                i++;
             }
         }
-        return null;
+        return index;
     }
 }
