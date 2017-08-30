@@ -3,6 +3,8 @@ package com.simpledb.writer;
 import com.simpledb.KeyValuePair;
 import com.simpledb.index.LookupIndex;
 import com.simpledb.memtable.Memtable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 
 import java.io.*;
@@ -19,6 +21,9 @@ public class DefaultLogWriter implements LogWriter<String> {
     private final Charset encoding;
     private String dirname;
     protected ReadWriteLock readWriteLock;
+
+    //Log
+    private Logger logger = LogManager.getRootLogger();
 
     public DefaultLogWriter(ReadWriteLock readWriteLock, String dirname){
 
@@ -90,6 +95,7 @@ public class DefaultLogWriter implements LogWriter<String> {
 
     public LookupIndex _dump(Memtable<String> memtable) throws IOException {
 
+        logger.debug("Initiating Dump");
         String fileName = this.dirname + File.separator + DateTime.now().getMillis();
         File file = new File(fileName);
         try(FileOutputStream fos = new FileOutputStream(file);
@@ -110,7 +116,7 @@ public class DefaultLogWriter implements LogWriter<String> {
                 if(buffer.position() >= partionSize){
 
                     pos += buffer.position();
-                    System.out.println("File POSTION: " + pos);
+                    logger.debug("File POSTION: " + pos);
                     buffer.flip();
 
                     //Find class to do this more effeciently don't want to write one byte at a time

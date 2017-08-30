@@ -7,6 +7,8 @@ import com.simpledb.memtable.Memtable;
 import com.simpledb.result.Result;
 import com.simpledb.tokenizer.ActionSETTokenizer;
 import com.simpledb.writer.LogWriter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.OutputStream;
 import java.util.Stack;
@@ -15,6 +17,9 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 
 public class ActionSET extends Action<String> {
+
+    //Log
+    private Logger logger = LogManager.getRootLogger();
 
     public ActionSET(Processor processor, OutputStream out){
 
@@ -39,17 +44,15 @@ public class ActionSET extends Action<String> {
                 synchronized (this){
 
                     while((memtable = processor.getMemTable()) == null || memtable.isFull()){
-                        System.out.println("FULL WAITING....");
+                        logger.debug(String.format("MEMTABLE FULL - Size: \t%s", memtable.getSize()));
                         processor.wakeUpMemtableManagerThread();
 
                         try{
                             //Wait for Managememtable to dump memtable
                             wait(1000);
                         }catch(InterruptedException e){};
-                        System.out.println("RESUMING...");
+                        logger.debug("attempting to resume SET");
                     }
-
-                    System.out.println("NEW MEMTABLE OBTAINED!!!");
                 }
 
                 memtable.insert(keyValuePair);

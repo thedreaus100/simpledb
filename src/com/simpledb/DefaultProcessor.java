@@ -116,6 +116,7 @@ public class DefaultProcessor extends Processor<String> {
     public synchronized void wakeUpMemtableManagerThread(){
 
         if(this.memtableManagerThread != null){
+            logger.debug("WAKING UP THREAD!!!");
             this.memtableManagerThread.interrupt();
         }
     }
@@ -146,12 +147,6 @@ public class DefaultProcessor extends Processor<String> {
                                 action.execute((String) queryPair.getValue())
                         );
 
-
-                        /*
-                            Force Blocking for Actions if the Client is a Human
-
-                            ...what if we have multiple clients?
-                         */
                         if(this.clientType.equals(ClientType.CMD)){
                             Result result = futureResult.get(10, TimeUnit.SECONDS);
                             this.printStream.println();
@@ -177,7 +172,7 @@ public class DefaultProcessor extends Processor<String> {
                 logger.error("COMMAND FAILED TO EXECUTE: ", e);
                 prompt();
             }
-        }while(true && !Thread.interrupted());
+        }while(true);
     }
 
     /*
@@ -186,7 +181,7 @@ public class DefaultProcessor extends Processor<String> {
         wait until all threads currently writing to the Memtable are done... then obtain a lock
         and dump this to a file.
 
-        needs lock because I want to ensure that no other Threads can add to the Memtable before dump is executed
+        needs lock in order to ensure that no other Threads can add to the Memtable before dump is executed
      */
     public Runnable manageMemtable(long timeout){
 
@@ -194,33 +189,32 @@ public class DefaultProcessor extends Processor<String> {
 
             Lock lock = null;
             memtableManagerThread = Thread.currentThread();
+            memtableManagerThread.setName("Manage Memtable Thread");
+
             while(true){
                try{
 
-                   /*
-                    Need to make sure this won't end up in some weird fairness block... which is why
-                    trylock is being used here.
-                    */
-
+                   logger.debug("attempting to obtain Lock:\t" + memtableLock);
                    lock = memtableLock.readLock();
-                   lock.tryLock();
+                   lock.lock();
                    try{
                        if(memTable.isFull()){
-                           logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
+                           //logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
+                           logger.debug("Memtable full initating dump!!!");
                            this.cacheService.submit(dump(writer, memTable));
-
                            //No other writes should be allowed to the Memtable now.
                            memTable.dumped();
                            memTable = new DefaultMemtable(memtableLock, writer);
 
                            //lets threads know a new memtable is available.
                            synchronized (this) {
+                               logger.debug("NOTIFIYING DUMP COMPLETION");
                                notifyAll();
+                               logger.debug("DUMP COMPLETE!");
                            }
                        }
                    }finally{
                        lock.unlock();
-                       //notifies Threads that are blocked because of a Full Memtable
                    }
 
                    Thread.sleep(timeout);
@@ -238,10 +232,11 @@ public class DefaultProcessor extends Processor<String> {
     public Runnable dump(final LogWriter<String> writer, final Memtable<String> memTable){
 
         return ()->{
+            Thread.currentThread().setName("Dump Memtable");
             LookupIndex index = null;
             try {
                 index = writer.dump(memTable, false);
-                System.out.println(index);
+                logger.debug(index);
             } catch (IOException e) {
                 e.printStackTrace();
             }

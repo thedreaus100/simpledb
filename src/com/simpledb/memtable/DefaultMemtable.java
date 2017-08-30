@@ -2,6 +2,8 @@ package com.simpledb.memtable;
 
 import com.simpledb.KeyValuePair;
 import com.simpledb.writer.LogWriter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -22,6 +24,9 @@ public class DefaultMemtable implements Memtable<String> {
     protected  ReadWriteLock readWriteLock;
     protected boolean dumped = false;
 
+    //Log
+    private Logger logger = LogManager.getRootLogger();
+
     public DefaultMemtable(ReadWriteLock readWriteLock, LogWriter<String> writer){
 
         this.readWriteLock = readWriteLock;
@@ -41,9 +46,11 @@ public class DefaultMemtable implements Memtable<String> {
 
        if(!dumped){
            //blocks as long as nothing else is concurrently writing... and there are no ongoing reads
-           System.out.println("LOCK: " + readWriteLock);
+           logger.debug("Attempting to obtain LOCK: " + readWriteLock);
            Lock lock = readWriteLock.writeLock();
            lock.lock();
+
+           logger.debug(String.format("Writing key %s\t", keyValuePair.getKey()));
            try{
                cacheMap.put(keyValuePair.getKey(), keyValuePair.getValue());
            }finally{
