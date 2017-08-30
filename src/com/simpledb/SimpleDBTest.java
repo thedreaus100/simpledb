@@ -112,6 +112,7 @@ public class SimpleDBTest {
                     Thread.sleep(0);
                 }
 
+                pos.flush();
                 System.out.println("TIME: " + ((double)(DateTime.now().getMillis() - startTime)/1000.00));
             } catch (InterruptedException e) {
                 System.out.println("INTERUPPTED");
