@@ -7,7 +7,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -40,13 +39,18 @@ public class DefaultMemtable implements Memtable<String> {
     }
 
     @Override
-    public void insert(KeyValuePair<String> keyValuePair) {
+    public void insert(KeyValuePair<String> keyValuePair) throws MemtableException {
 
        //blocks as long as nothing else is concurrently writing... and there are no ongoing reads
        logger.debug("Attempting to obtain write lock: " + writeLock);
        writeLock.lock();
        logger.debug(String.format("Writing key %s\t", keyValuePair.getKey()));
        try{
+           if(this.isFull()){
+               throw new MemtableFullException();
+           }else if(this.dumped){
+               throw new MemtableDumpedException();
+           }
            cacheMap.put(keyValuePair.getKey(), keyValuePair.getValue());
        }finally{
            //don't want to block while calculating used space

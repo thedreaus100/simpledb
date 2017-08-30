@@ -4,6 +4,7 @@ import com.simpledb.KeyValuePair;
 import com.simpledb.Processor;
 import com.simpledb.index.LookupIndex;
 import com.simpledb.memtable.Memtable;
+import com.simpledb.memtable.MemtableException;
 import com.simpledb.result.Result;
 import com.simpledb.tokenizer.ActionSETTokenizer;
 import org.apache.logging.log4j.LogManager;
@@ -27,33 +28,49 @@ public class ActionSET extends Action<String> {
     @Override
     protected Callable<Result> _execute(String input) {
 
-        return ()->{
+        return new Callable<Result>(){
 
-            //Want to make sure that if we have a full memtable no other processes are trying to write to a full table
-            KeyValuePair<String> keyValuePair = tokenizer.tokenize(input);
-            Memtable<String> memtable = null;
-            Result result = null;
+            @Override
+            public Result call() throws Exception {
 
-            //block until it has access to non-full Memtable.
-            //once full interrupt Memtable manager Thread so that it can dump the memtable.
-            synchronized (self){
-
-                while((memtable = processor.getMemTable()) == null || memtable.isFull()){
-                    logger.debug(String.format("MEMTABLE FULL - Size: \t%s", memtable.getSize()));
-                    processor.wakeUpMemtableManagerThread();
-
+                //Want to make sure that if we have a full memtable no other processes are trying to write to a full table
+                KeyValuePair<String> keyValuePair = tokenizer.tokenize(input);
+                Result result = null;
+                boolean complete = false;
+                do{
                     try{
-                        //Wait for Managememtable to dump memtable
-                        wait(1000);
-                    }catch(InterruptedException e){};
-                    logger.debug("attempting to resume SET");
-                }
+                        Memtable<String> memtable = getMemtable();
+                        memtable.insert(keyValuePair);
+                        complete = true;
+                        result = new Result(String.format("INSERTED:\t%s", keyValuePair));
+                        outputResult(result);
+                    }catch(MemtableException e){}
+                }while(!complete);
+                return result;
             }
 
-            memtable.insert(keyValuePair);
-            result = new Result(String.format("INSERTED:\t%s", keyValuePair));
-            outputResult(result);
-            return result;
+            /*
+                block until it has access to non-full Memtable.
+                once full interrupt Memtable manager Thread so that it can dump the memtable.
+             */
+            public Memtable<String> getMemtable(){
+
+                Memtable<String> memtable = null;
+                synchronized (self){
+                    while((memtable = processor.getMemTable()) == null || memtable.isFull()){
+                        logger.debug(String.format("MEMTABLE FULL - Size: \t%s", memtable.getSize()));
+                        processor.wakeUpMemtableManagerThread();
+
+                        try{
+                            //Wait for Managememtable to dump memtable
+                            wait(1000);
+                        }catch(InterruptedException e){};
+                        logger.debug("attempting to resume SET");
+                    }
+                }
+
+                return memtable;
+            }
         };
     }
 }

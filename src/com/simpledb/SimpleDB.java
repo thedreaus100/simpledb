@@ -16,7 +16,6 @@ public class SimpleDB {
     private static ExecutorService service;
     private static Logger logger = LogManager.getRootLogger();
 
-
     public static void main(String[] args) {
 
         service = Executors.newFixedThreadPool(10);
@@ -35,10 +34,7 @@ public class SimpleDB {
             @Override
             public void run() {
                 try{
-                    for(ExecutorService service:ExecutorContext.getInstance().getExecutorServices()){
-                        logger.trace("Shutting Down: " + service);
-                        service.shutdownNow();
-                    }
+                    ExecutorContext.getInstance().shutdown();
                 }catch(Exception e){
                     e.printStackTrace();
                 }

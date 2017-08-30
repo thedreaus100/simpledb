@@ -7,7 +7,7 @@ import java.util.TreeMap;
 
 public interface Memtable<K> {
 
-    public void insert(KeyValuePair<K> keyValuePair);
+    public void insert(KeyValuePair<K> keyValuePair) throws MemtableException;
     public long getSize();
     public long getMaxSize();
     public long getMaxBlockSize();

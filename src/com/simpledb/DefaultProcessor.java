@@ -38,6 +38,7 @@ public class DefaultProcessor extends Processor<String> {
     private ReentrantReadWriteLock.WriteLock memtableWriteLock;
     private ReentrantReadWriteLock readWriteLock;
     private Thread memtableManagerThread = null;
+    private Boolean alive = true;
 
     //Executors
     private final ExecutorService cacheService;
@@ -135,6 +136,12 @@ public class DefaultProcessor extends Processor<String> {
         processActions();
     }
 
+    public void exit(){
+
+        alive = false;
+        ExecutorContext.getInstance().shutdown();
+    }
+
     public void processActions(){
 
         Scanner scanner = new Scanner(this.inputStream);
@@ -179,7 +186,9 @@ public class DefaultProcessor extends Processor<String> {
                 logger.error("COMMAND FAILED TO EXECUTE: ", e);
                 prompt();
             }
-        }while(true);
+        }while(alive);
+
+        logger.debug("exit");
     }
 
     /*

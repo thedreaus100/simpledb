@@ -48,8 +48,9 @@ public class SimpleDBTest {
             //System.setIn(pis);
             pos.connect(pis);
 
+            DefaultProcessor processor = new DefaultProcessor(DefaultProcessor.ClientType.API, pis, System.out);
             runnables.add(SimpleDBTest.fillSimpleDB(pis, pos));
-            runnables.add(new DefaultProcessor(DefaultProcessor.ClientType.API, pis, System.out));
+            runnables.add(processor);
 
             int numThreads = runnables.size();
             final CountDownLatch allExecutorThreadsReady = new CountDownLatch(numThreads);

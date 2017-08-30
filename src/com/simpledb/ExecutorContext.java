@@ -1,5 +1,8 @@
 package com.simpledb;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -8,6 +11,7 @@ public class ExecutorContext {
 
     private static ExecutorContext self;
     private final List<ExecutorService> services;
+    private static Logger logger = LogManager.getRootLogger();
 
     private ExecutorContext(){
 
@@ -32,5 +36,12 @@ public class ExecutorContext {
     public List<ExecutorService> getExecutorServices(){
 
         return services;
+    }
+
+    public void shutdown(){
+        for(ExecutorService service:ExecutorContext.getInstance().getExecutorServices()){
+            logger.trace("Shutting Down: " + service);
+            service.shutdownNow();
+        }
     }
 }
