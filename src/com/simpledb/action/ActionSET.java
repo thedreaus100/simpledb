@@ -6,24 +6,22 @@ import com.simpledb.index.LookupIndex;
 import com.simpledb.memtable.Memtable;
 import com.simpledb.result.Result;
 import com.simpledb.tokenizer.ActionSETTokenizer;
-import com.simpledb.writer.LogWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.OutputStream;
-import java.util.Stack;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ExecutorService;
 
 public class ActionSET extends Action<String> {
 
     //Log
     private Logger logger = LogManager.getRootLogger();
+    private final ActionSET self;
 
     public ActionSET(Processor processor, OutputStream out){
 
         super(processor, new ActionSETTokenizer(), out);
+        self = this;
     }
 
     @Override
@@ -41,7 +39,7 @@ public class ActionSET extends Action<String> {
 
                 //block until it has access to non-full Memtable.
                 //once full interrupt Memtable manager Thread so that it can dump the memtable.
-                synchronized (this){
+                synchronized (self){
 
                     while((memtable = processor.getMemTable()) == null || memtable.isFull()){
                         logger.debug(String.format("MEMTABLE FULL - Size: \t%s", memtable.getSize()));
