@@ -35,18 +35,21 @@ public class ActionSET extends Action<String> {
                 Result result = null;
 
                 //block until it has access to non-full Memtable.
-                //should replace with Reeantract Lock
+                //once full interrupt Memtable manager Thread so that it can dump the memtable.
                 synchronized (this){
+
                     while((memtable = processor.getMemTable()) == null || memtable.isFull()){
                         System.out.println("FULL WAITING....");
+                        processor.wakeUpMemtableManagerThread();
+
                         try{
-                            wait();
-                        }catch(InterruptedException e){}
-                        finally{
-                            memtable = processor.getMemTable();
-                        }
+                            //Wait for Managememtable to dump memtable
+                            wait(1000);
+                        }catch(InterruptedException e){};
                         System.out.println("RESUMING...");
                     }
+
+                    System.out.println("NEW MEMTABLE OBTAINED!!!");
                 }
 
                 memtable.insert(keyValuePair);

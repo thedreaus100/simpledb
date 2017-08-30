@@ -34,10 +34,12 @@ public class DefaultProcessor extends Processor<String> {
     private final LogWriter<String> writer;
     private final ClientType clientType;
     private ReadWriteLock memtableLock;
+    private Thread memtableManagerThread = null;
 
     //Executors
     private final ExecutorService cacheService;
     private final ScheduledExecutorService daemons;
+    private final ExecutorService memtableManagerService;
 
     //Client Input
     private String prompt = ">\t";
@@ -80,6 +82,7 @@ public class DefaultProcessor extends Processor<String> {
         this.actionTokenizer = new ActionTokenizer();
         this.cacheService = Executors.newCachedThreadPool();
         this.daemons = Executors.newScheduledThreadPool(2);
+        this.memtableManagerService = Executors.newSingleThreadExecutor();
         this.validator = new CompoundValidator<String>(
                 actionTokenizer.getValidator()
                 //TODO: Add Max key size check
@@ -94,6 +97,7 @@ public class DefaultProcessor extends Processor<String> {
 
         ExecutorContext.getInstance()
                 .register(cacheService)
+                .register(memtableManagerService)
                 .register(daemons);
     }
 
@@ -108,10 +112,17 @@ public class DefaultProcessor extends Processor<String> {
         return this.memTable;
     }
 
+    @Override
+    public synchronized void wakeUpMemtableManagerThread(){
+
+        if(this.memtableManagerThread != null){
+            this.memtableManagerThread.interrupt();
+        }
+    }
+
     public void run() {
 
-        daemons.scheduleAtFixedRate(manageMemtable(), 0, 100, TimeUnit.MILLISECONDS);
-
+       memtableManagerService.submit(manageMemtable(10000));
         //Main Thread
         processActions();
     }
@@ -177,27 +188,46 @@ public class DefaultProcessor extends Processor<String> {
 
         needs lock because I want to ensure that no other Threads can add to the Memtable before dump is executed
      */
-    public Runnable manageMemtable(){
+    public Runnable manageMemtable(long timeout){
 
         return ()->{
-            Lock lock = memtableLock.readLock();
-            lock.lock();
-            try{
-                if(memTable.isFull()){
-                    System.out.println("MEMTABLE FULL INITATING DUMP: ");
-                    logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
-                    this.cacheService.submit(dump(writer, memTable));
 
-                    //No other writes should be allowed to the Memtable now.
-                    memTable.dumped();
-                    memTable = new DefaultMemtable(memtableLock, writer);
+            Lock lock = null;
+            memtableManagerThread = Thread.currentThread();
+            while(true){
+               try{
 
-                    //lets threads know a new memtable is available.
-                    notifyAll();
-                }
-            }finally{
-                lock.unlock();
-                //notifies Threads that are blocked because of a Full Memtable
+                   /*
+                    Need to make sure this won't end up in some weird fairness block... which is why
+                    trylock is being used here.
+                    */
+
+                   lock = memtableLock.readLock();
+                   lock.tryLock();
+                   try{
+                       if(memTable.isFull()){
+                           logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
+                           this.cacheService.submit(dump(writer, memTable));
+
+                           //No other writes should be allowed to the Memtable now.
+                           memTable.dumped();
+                           memTable = new DefaultMemtable(memtableLock, writer);
+
+                           //lets threads know a new memtable is available.
+                           synchronized (this) {
+                               notifyAll();
+                           }
+                       }
+                   }finally{
+                       lock.unlock();
+                       //notifies Threads that are blocked because of a Full Memtable
+                   }
+
+                   Thread.sleep(timeout);
+               }catch(InterruptedException e){
+
+                  logger.debug("Sleep interrupted");
+               }
             }
         };
     }

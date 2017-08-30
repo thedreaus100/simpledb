@@ -41,6 +41,7 @@ public class DefaultMemtable implements Memtable<String> {
 
        if(!dumped){
            //blocks as long as nothing else is concurrently writing... and there are no ongoing reads
+           System.out.println("LOCK: " + readWriteLock);
            Lock lock = readWriteLock.writeLock();
            lock.lock();
            try{
