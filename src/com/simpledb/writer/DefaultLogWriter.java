@@ -1,6 +1,7 @@
 package com.simpledb.writer;
 
 import com.simpledb.KeyValuePair;
+import com.simpledb.index.DefaultLookUpIndex;
 import com.simpledb.index.LookupIndex;
 import com.simpledb.memtable.Memtable;
 import org.apache.logging.log4j.LogManager;
@@ -98,6 +99,7 @@ public class DefaultLogWriter implements LogWriter<String> {
         logger.debug("Initiating Dump");
         String fileName = this.dirname + File.separator + DateTime.now().getMillis();
         File file = new File(fileName);
+        LookupIndex index = new DefaultLookUpIndex(file);
         try(FileOutputStream fos = new FileOutputStream(file);
             BufferedOutputStream bos = new BufferedOutputStream(fos);
             ObjectOutputStream oos = new ObjectOutputStream(bos)){
@@ -107,10 +109,13 @@ public class DefaultLogWriter implements LogWriter<String> {
                     .allocate(memtable.getMaxBlockSize() <= Integer.MAX_VALUE ? (int)memtable.getMaxBlockSize(): Integer.MAX_VALUE);
 
             Iterator<String> memtableKeys = memtable.getMap().navigableKeySet().iterator();
+            int i = 0;
             String key = memtableKeys.next();
-            int bytesRead = 0;
             do{
                 try{
+                    if(i == 0){
+                        index.insertKey(key, 0);
+                    }
                     Serializable value = memtable.getMap().get(key);
                     buffer.put(getBytes(key));
                     buffer.putChar(keyValuePairDelimiter);
@@ -119,14 +124,16 @@ public class DefaultLogWriter implements LogWriter<String> {
 
                     //Only want to go to the next key if everything was successfully written otherwise rewrite to the next block.
                     key = memtableKeys.next();
+                    i++;
                 }catch(BufferOverflowException e){
                     System.out.println("BUFFER OVERFLOW");
                     pos += emptyBuffer(bos, buffer);
+                    index.insertKey(key, pos);
                     logger.debug("File POSTION: " + pos);
                 }
             }while(memtableKeys.hasNext());
 
-            return null;
+            return index;
         }catch(IOException e){
 
             logger.debug("Error", e);

@@ -82,8 +82,8 @@ public class DefaultProcessor extends Processor<String> {
         this.readWriteLock = new ReentrantReadWriteLock(true);
         this.memtableReadLock = readWriteLock.readLock();
         this.memtableWriteLock = readWriteLock.writeLock();
-        this.writer = new DefaultLogWriter(this.memtableReadLock);
-        //this.writer = new SchemaLogWriter();
+        //this.writer = new DefaultLogWriter(this.memtableReadLock);
+        this.writer = new SchemaLogWriter();
         this.memTable = new DefaultMemtable(memtableWriteLock, writer);
         this.actionTokenizer = new ActionTokenizer();
         this.cacheService = Executors.newCachedThreadPool();

@@ -53,7 +53,7 @@ public class SchemaLogWriter implements LogWriter<String>{
 
         LookupIndex index = new DefaultLookUpIndex(file);
         //refactor!
-        long maxBlockSize = memtable.getSize()/4;
+        long maxBlockSize = memtable.getMaxBlockSize();
         try(DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<GenericRecord>(datumWriter)){
             dataFileWriter.create(schema, file);
             int i = 0;
