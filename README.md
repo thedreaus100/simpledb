@@ -40,7 +40,7 @@ The ReentranantReadWriteLock that SimpleDB also limits starvation.
 
 ***Schema***
 
-SimpleDB is also (Avro Schema)[https://avro.apache.org/docs/1.8.1/index.html] compatible.  The Avro schema allows data to be effeciently compacted
+SimpleDB is also[Avro Schema](https://avro.apache.org/docs/1.8.1/index.html) compatible.  The Avro schema allows data to be effeciently compacted
 but also allows schemas to be backward and forward compatible.
 
 
