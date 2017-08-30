@@ -13,6 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class DefaultLogWriter implements LogWriter<String> {
 
@@ -20,23 +21,23 @@ public class DefaultLogWriter implements LogWriter<String> {
     private final char keyValuePairDelimiter;
     private final Charset encoding;
     private String dirname;
-    protected ReadWriteLock readWriteLock;
+    protected ReentrantReadWriteLock.ReadLock readLock;
 
     //Log
     private Logger logger = LogManager.getRootLogger();
 
-    public DefaultLogWriter(ReadWriteLock readWriteLock, String dirname){
+    public DefaultLogWriter(ReentrantReadWriteLock.ReadLock readLock, String dirname){
 
         this.fieldDelimiter = ';';
         this.keyValuePairDelimiter = ',';
         this.dirname = dirname;
-        this.readWriteLock = readWriteLock;
+        this.readLock = readLock;
         encoding = StandardCharsets.UTF_8;
     }
 
-    public DefaultLogWriter(ReadWriteLock readWriteLock){
+    public DefaultLogWriter(ReentrantReadWriteLock.ReadLock readLock){
 
-        this(readWriteLock, "." + File.separator + "data");
+        this(readLock, "." + File.separator + "data");
     }
 
     @Override
@@ -81,12 +82,11 @@ public class DefaultLogWriter implements LogWriter<String> {
     public LookupIndex dump(Memtable<String> memtable, boolean shouldLock) throws IOException {
 
        if(shouldLock){
-           Lock lock = readWriteLock.readLock();
-           lock.lock();
+           readLock.lock();
            try{
                return _dump(memtable);
            }finally{
-               lock.unlock();
+               readLock.unlock();
            }
        }else{
            return _dump(memtable);

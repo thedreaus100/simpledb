@@ -33,7 +33,9 @@ public class DefaultProcessor extends Processor<String> {
     private final ConcurrentLinkedDeque<LookupIndex> indexStack;
     private final LogWriter<String> writer;
     private final ClientType clientType;
-    private ReadWriteLock memtableLock;
+    private ReentrantReadWriteLock.ReadLock memtableReadLock;
+    private ReentrantReadWriteLock.WriteLock memtableWriteLock;
+    private ReentrantReadWriteLock readWriteLock;
     private Thread memtableManagerThread = null;
 
     //Executors
@@ -76,9 +78,11 @@ public class DefaultProcessor extends Processor<String> {
     public DefaultProcessor(ClientType clientType, InputStream in, OutputStream out){
 
         this.clientType = clientType;
-        this.memtableLock = new ReentrantReadWriteLock(true);
-        this.writer = new DefaultLogWriter(this.memtableLock);
-        this.memTable = new DefaultMemtable(memtableLock, writer);
+        this.readWriteLock = new ReentrantReadWriteLock(true);
+        this.memtableReadLock = readWriteLock.readLock();
+        this.memtableWriteLock = readWriteLock.writeLock();
+        this.writer = new DefaultLogWriter(this.memtableReadLock);
+        this.memTable = new DefaultMemtable(memtableWriteLock, writer);
         this.actionTokenizer = new ActionTokenizer();
         this.cacheService = Executors.newCachedThreadPool();
         this.daemons = Executors.newScheduledThreadPool(2);
@@ -187,16 +191,14 @@ public class DefaultProcessor extends Processor<String> {
 
         return ()->{
 
-            Lock lock = null;
             memtableManagerThread = Thread.currentThread();
             memtableManagerThread.setName("Manage Memtable Thread");
 
             while(true){
                try{
 
-                   logger.debug("attempting to obtain Lock:\t" + memtableLock);
-                   lock = memtableLock.readLock();
-                   lock.lock();
+                   logger.debug(String.format("Attempting to obtain read lock: %s", readWriteLock));
+                   memtableReadLock.lock();
                    try{
                        if(memTable.isFull()){
                            //logger.debug(String.format("Memtable size: %s, full: %s", memTable.getSize(), memTable.isFull()));
@@ -204,7 +206,7 @@ public class DefaultProcessor extends Processor<String> {
                            this.cacheService.submit(dump(writer, memTable));
                            //No other writes should be allowed to the Memtable now.
                            memTable.dumped();
-                           memTable = new DefaultMemtable(memtableLock, writer);
+                           memTable = new DefaultMemtable(memtableWriteLock, writer);
 
                            //lets threads know a new memtable is available.
                            synchronized (this) {
@@ -214,7 +216,7 @@ public class DefaultProcessor extends Processor<String> {
                            }
                        }
                    }finally{
-                       lock.unlock();
+                       memtableReadLock.unlock();
                    }
 
                    Thread.sleep(timeout);
@@ -232,7 +234,7 @@ public class DefaultProcessor extends Processor<String> {
     public Runnable dump(final LogWriter<String> writer, final Memtable<String> memTable){
 
         return ()->{
-            Thread.currentThread().setName("Dump Memtable");
+
             LookupIndex index = null;
             try {
                 index = writer.dump(memTable, false);

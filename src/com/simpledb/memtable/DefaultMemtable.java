@@ -21,15 +21,15 @@ public class DefaultMemtable implements Memtable<String> {
     private int maxSize;
     private AtomicInteger size;
     private final LogWriter<String> writer;
-    protected  ReadWriteLock readWriteLock;
+    protected  ReentrantReadWriteLock.WriteLock writeLock;
     protected boolean dumped = false;
 
     //Log
     private Logger logger = LogManager.getRootLogger();
 
-    public DefaultMemtable(ReadWriteLock readWriteLock, LogWriter<String> writer){
+    public DefaultMemtable(ReentrantReadWriteLock.WriteLock writeLock, LogWriter<String> writer){
 
-        this.readWriteLock = readWriteLock;
+        this.writeLock = writeLock;
         this.writer = writer;
         size = new AtomicInteger(0);
         cacheMap = new TreeMap<String, Serializable>();
@@ -46,17 +46,15 @@ public class DefaultMemtable implements Memtable<String> {
 
        if(!dumped){
            //blocks as long as nothing else is concurrently writing... and there are no ongoing reads
-           logger.debug("Attempting to obtain LOCK: " + readWriteLock);
-           Lock lock = readWriteLock.writeLock();
-           lock.lock();
-
+           logger.debug("Attempting to obtain write lock: " + writeLock);
+           writeLock.lock();
            logger.debug(String.format("Writing key %s\t", keyValuePair.getKey()));
            try{
                cacheMap.put(keyValuePair.getKey(), keyValuePair.getValue());
            }finally{
                //don't want to block while calculating used space
                size.addAndGet(writer.calculateSpace(keyValuePair));
-               lock.unlock();
+               writeLock.unlock();
            }
        }
     }
