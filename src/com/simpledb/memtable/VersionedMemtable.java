@@ -5,12 +5,12 @@ import com.simpledb.KeyValuePair;
 import java.io.Serializable;
 import java.util.TreeMap;
 
-public class VersionedMemtable<K> implements Memtable<K> {
+public class VersionedMemtable<K,T> implements Memtable<K, T> {
 
 
 
     @Override
-    public void insert(KeyValuePair<K> keyValuePair) throws MemtableException {
+    public void insert(KeyValuePair<K, T> keyValuePair) throws MemtableException {
 
     }
 
@@ -40,7 +40,7 @@ public class VersionedMemtable<K> implements Memtable<K> {
     }
 
     @Override
-    public TreeMap<K, Serializable> getMap() {
+    public TreeMap<K, T> getMap() {
         return null;
     }
 }
