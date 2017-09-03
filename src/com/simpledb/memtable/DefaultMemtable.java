@@ -30,7 +30,7 @@ public class DefaultMemtable implements Memtable<String> {
         this.writer = writer;
         this.size = new AtomicLong(0);
         this.cacheMap = new TreeMap<String, Serializable>();
-        this.maxSize = 1024 * 50;
+        this.maxSize = 1024 * 10;
         this.maxBlockSize = 1024;
         this.dumped = new AtomicBoolean(false);
     }
