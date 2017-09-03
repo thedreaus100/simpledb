@@ -41,6 +41,7 @@ public class VersionedMemtable<K, T> extends Memtable<K, T> {
                 throw new MemtableDumpedException();
             }
 
+            //If a lock is placed on the memtable block until lock is removed!
             ConcurrentLinkedDeque<T> stack = cacheMap.get(keyValuePair.getKey());
             stack.addLast(keyValuePair.getValue());
         }finally{

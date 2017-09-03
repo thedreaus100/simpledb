@@ -226,6 +226,8 @@ public class DefaultProcessor extends Processor<String, String> {
             while(true){
                try{
                    Memtable<String, String> currentMemtable = memTable;
+
+                   //wait until memtable is safe to read, then block futher writes.
                    currentMemtable.lock();
                    try{
                        if(memTable.isFull()){
