@@ -22,23 +22,21 @@ public class DefaultLogWriter implements LogWriter<String, String> {
     protected final char keyValuePairDelimiter;
     protected Charset encoding;
     protected String dirname;
-    protected ReentrantReadWriteLock.ReadLock readLock;
 
     //Log
     private Logger logger = LogManager.getRootLogger();
 
-    public DefaultLogWriter(ReentrantReadWriteLock.ReadLock readLock, String dirname){
+    public DefaultLogWriter(String dirname){
 
         this.fieldDelimiter = ';';
         this.keyValuePairDelimiter = ',';
         this.dirname = dirname;
-        this.readLock = readLock;
         encoding = StandardCharsets.UTF_8;
     }
 
-    public DefaultLogWriter(ReentrantReadWriteLock.ReadLock readLock){
+    public DefaultLogWriter(){
 
-        this(readLock, "." + File.separator + "data");
+        this( "." + File.separator + "data");
     }
 
     @Override
@@ -83,11 +81,11 @@ public class DefaultLogWriter implements LogWriter<String, String> {
     public LookupIndex dump(Memtable<String, String> memtable, boolean shouldLock) throws IOException {
 
        if(shouldLock){
-           readLock.lock();
+           memtable.lock();
            try{
                return _dump(memtable);
            }finally{
-               readLock.unlock();
+               memtable.unlock();
            }
        }else{
            return _dump(memtable);

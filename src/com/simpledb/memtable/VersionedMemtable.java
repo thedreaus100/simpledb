@@ -11,6 +11,7 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class VersionedMemtable<K, T> extends Memtable<K, T> {
@@ -20,10 +21,13 @@ public class VersionedMemtable<K, T> extends Memtable<K, T> {
 
     protected final TreeMap<K, ConcurrentLinkedDeque<T>> cacheMap;
 
+    //Lock
+    protected ReentrantLock lock;
+
     public VersionedMemtable(LogWriter<K, T> writer){
 
         super(writer);
-        this.writeLock = writeLock;
+        this.lock = new ReentrantLock();
         this.cacheMap = new TreeMap<K, ConcurrentLinkedDeque<T>>();
     }
 
@@ -40,8 +44,6 @@ public class VersionedMemtable<K, T> extends Memtable<K, T> {
             ConcurrentLinkedDeque<T> stack = cacheMap.get(keyValuePair.getKey());
             stack.addLast(keyValuePair.getValue());
         }finally{
-            //don't want to block while calculating used space
-            writeLock.unlock();
             size.addAndGet(writer.calculateSpace(keyValuePair));
         }
     }
@@ -60,5 +62,15 @@ public class VersionedMemtable<K, T> extends Memtable<K, T> {
     @Override
     public TreeMap<K, ConcurrentLinkedDeque<T>> cache() {
         return cacheMap;
+    }
+
+    @Override
+    public void lock() {
+        lock.lock();
+    }
+
+    @Override
+    public void unlock() {
+        lock.unlock();
     }
 }

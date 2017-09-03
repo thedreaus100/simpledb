@@ -18,13 +18,10 @@ public abstract class Memtable<K, T> {
     protected long maxSize;
     protected long maxBlockSize;
     protected AtomicLong size;
-    protected ReentrantReadWriteLock.WriteLock writeLock;
     protected AtomicBoolean dumped;
-
 
     public Memtable(LogWriter<K, T> writer){
 
-        this.writeLock = writeLock;
         this.writer = writer;
         this.size = new AtomicLong(0);
         this.maxSize = 1024 * 50;
@@ -59,6 +56,10 @@ public abstract class Memtable<K, T> {
     public boolean isFull() {
         return size.get() >= maxSize;
     }
+
+    public abstract void lock();
+
+    public abstract void unlock();
 
     public abstract Map<K, ? extends Object> cache();
 

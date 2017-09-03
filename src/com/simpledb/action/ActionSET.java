@@ -39,7 +39,8 @@ public class ActionSET extends Action<String, String> {
                 boolean complete = false;
                 do{
                     try{
-                        Memtable<String, String> memtable = getMemtable();
+                        //Grab available Memtable which can change because of the ManageMemtable Thread.
+                        Memtable<String, String> memtable = processor.waitForNextMemtable();
                         memtable.insert(keyValuePair);
                         complete = true;
                         result = new Result(String.format("INSERTED:\t%s", keyValuePair));
@@ -47,29 +48,6 @@ public class ActionSET extends Action<String, String> {
                     }catch(MemtableException e){}
                 }while(!complete);
                 return result;
-            }
-
-            /*
-                block until it has access to non-full Memtable.
-                once full interrupt Memtable manager Thread so that it can dump the memtable.
-             */
-            public Memtable<String, String> getMemtable(){
-
-                Memtable<String, String> memtable = null;
-                synchronized (self){
-                    while((memtable = processor.getMemTable()) == null || memtable.isFull()){
-                        logger.debug(String.format("MEMTABLE FULL - Size: \t%s", memtable.getSize()));
-                        processor.wakeUpMemtableManagerThread();
-
-                        try{
-                            //Wait for Managememtable to dump memtable
-                            wait(1000);
-                        }catch(InterruptedException e){};
-                        logger.debug("attempting to resume SET");
-                    }
-                }
-
-                return memtable;
             }
         };
     }

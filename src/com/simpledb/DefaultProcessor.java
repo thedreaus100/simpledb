@@ -34,9 +34,6 @@ public class DefaultProcessor extends Processor<String, String> {
     private final ConcurrentLinkedDeque<LookupIndex> indexStack;
     private final LogWriter<String, String> writer;
     private final ClientType clientType;
-    private ReentrantReadWriteLock.ReadLock memtableReadLock;
-    private ReentrantReadWriteLock.WriteLock memtableWriteLock;
-    private ReentrantReadWriteLock readWriteLock;
     private Thread memtableManagerThread = null;
     private Boolean alive = true;
 
@@ -80,12 +77,10 @@ public class DefaultProcessor extends Processor<String, String> {
     public DefaultProcessor(ClientType clientType, InputStream in, OutputStream out){
 
         this.clientType = clientType;
-        this.readWriteLock = new ReentrantReadWriteLock(true);
-        this.memtableReadLock = readWriteLock.readLock();
-        this.memtableWriteLock = readWriteLock.writeLock();
+
         //this.writer = new DefaultLogWriter(this.memtableReadLock);
         this.writer = new SchemaLogWriter();
-        this.memTable = new DefaultMemtable(memtableWriteLock, writer);
+        this.memTable = new DefaultMemtable(writer);
         this.actionTokenizer = new ActionTokenizer();
         this.cacheService = Executors.newCachedThreadPool();
         this.daemons = Executors.newScheduledThreadPool(2);
@@ -117,6 +112,28 @@ public class DefaultProcessor extends Processor<String, String> {
     @Override
     public Memtable<String, String> getMemTable(){
         return this.memTable;
+    }
+
+    /*
+       block until it has access to non-full Memtable.
+       once full interrupt Memtable manager Thread so that it can dump the memtable.
+    */
+    @Override
+    public synchronized  Memtable<String, String> waitForNextMemtable() {
+
+        Memtable<String, String> memtable = null;
+        while((memtable = getMemTable()) == null || memtable.isFull()){
+            logger.debug(String.format("MEMTABLE FULL - Size: \t%s", memtable.getSize()));
+            wakeUpMemtableManagerThread();
+
+            try{
+                //Wait for Managememtable to dump memtable
+                wait(1000);
+            }catch(InterruptedException e){};
+            logger.debug("attempting to resume SET");
+        }
+
+        return memtable;
     }
 
     @Override
@@ -208,31 +225,23 @@ public class DefaultProcessor extends Processor<String, String> {
 
             while(true){
                try{
-
-                   /*
-                        Redo Locking....
-                    */
-                   logger.debug(String.format("Attempting to obtain read lock: %s", readWriteLock));
-                   memtableReadLock.lock();
+                   Memtable<String, String> currentMemtable = memTable;
+                   currentMemtable.lock();
                    try{
                        if(memTable.isFull()){
-                           //lets threads know a new memtable is available.
-                           //Needs to be synchronized to avoid
-                           synchronized (this) {
-                               //No other writes should be allowed to the Memtable now.
-                               logger.debug("Memtable full initating dump!!!");
-                               this.cacheService.submit(dump(writer, memTable));
 
-                               memTable.dumped();
-                               memTable = new DefaultMemtable(memtableWriteLock, writer);
+                           logger.debug("Memtable full initating dump!!!");
+                           this.cacheService.submit(dump(writer, memTable));
 
-                               logger.debug("NOTIFIYING DUMP COMPLETION");
-                               notifyAll();
-                               logger.debug("DUMP COMPLETE!");
-                           }
+                           memTable.dumped();
+                           memTable = new DefaultMemtable(writer);
+
+                           logger.debug("NOTIFIYING DUMP COMPLETION");
+                           notifyAll();
+                           logger.debug("DUMP COMPLETE!");
                        }
                    }finally{
-                       memtableReadLock.unlock();
+                       currentMemtable.unlock();
                    }
 
                    Thread.sleep(timeout);

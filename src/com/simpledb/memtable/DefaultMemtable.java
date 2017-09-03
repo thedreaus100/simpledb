@@ -20,11 +20,18 @@ public class DefaultMemtable extends Memtable<String, String> {
     private Logger logger = LogManager.getRootLogger();
     protected final TreeMap<String, String> cacheMap;
 
-    public DefaultMemtable(ReentrantReadWriteLock.WriteLock writeLock, LogWriter<String, String> writer){
+    //Lock
+    protected ReentrantReadWriteLock.ReadLock readLock;
+    protected ReentrantReadWriteLock.WriteLock writeLock;
+    protected ReentrantReadWriteLock readWriteLock;
+
+    public DefaultMemtable(LogWriter<String, String> writer){
 
         super(writer);
+        this.readWriteLock = new ReentrantReadWriteLock(true);
+        this.readLock = readWriteLock.readLock();
+        this.writeLock = readWriteLock.writeLock();
         this.cacheMap = new TreeMap<String, String>();
-        this.writeLock = writeLock;
     }
 
     @Override
@@ -61,5 +68,18 @@ public class DefaultMemtable extends Memtable<String, String> {
     @Override
     public TreeMap<String, String> cache() {
         return cacheMap;
+    }
+
+    @Override
+    public void lock() {
+
+        logger.debug(String.format("Attempting to obtain read lock: %s", readWriteLock));
+        this.readLock.lock();
+    }
+
+    @Override
+    public void unlock() {
+        logger.debug(String.format("unlocking: %s", readWriteLock));
+        this.readLock.unlock();
     }
 }
