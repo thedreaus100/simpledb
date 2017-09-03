@@ -60,7 +60,7 @@ public abstract class Memtable<K, T> {
         return size.get() >= maxSize;
     }
 
-    public abstract Map<K, T> cache();
+    public abstract Map<K, ? extends Object> cache();
 
     public abstract void insert(KeyValuePair<K, T> keyValuePair) throws MemtableException;
 

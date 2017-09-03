@@ -7,43 +7,58 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class VersionedMemtable<K,T> extends Memtable<K, T> {
+public class VersionedMemtable<K, T> extends Memtable<K, T> {
 
     //Log
     private Logger logger = LogManager.getRootLogger();
 
-    protected final TreeMap<String, ConcurrentLinkedDeque<String>> cacheMap;
+    protected final TreeMap<K, ConcurrentLinkedDeque<T>> cacheMap;
 
     public VersionedMemtable(LogWriter<K, T> writer){
 
         super(writer);
         this.writeLock = writeLock;
-        this.cacheMap = new TreeMap<String, ConcurrentLinkedDeque<String>>();
+        this.cacheMap = new TreeMap<K, ConcurrentLinkedDeque<T>>();
     }
 
     @Override
     public void insert(KeyValuePair<K, T> keyValuePair) throws MemtableException {
 
-        //TODO Implement this
+        try{
+            if(this.isFull()){
+                throw new MemtableFullException();
+            }else if(this.dumped.get()){
+                throw new MemtableDumpedException();
+            }
+
+            ConcurrentLinkedDeque<T> stack = cacheMap.get(keyValuePair.getKey());
+            stack.addLast(keyValuePair.getValue());
+        }finally{
+            //don't want to block while calculating used space
+            writeLock.unlock();
+            size.addAndGet(writer.calculateSpace(keyValuePair));
+        }
     }
 
     @Override
-    public Set<K> getKeys() {
-        return null;
+    public NavigableSet<K> getKeys() {
+        return cacheMap.navigableKeySet();
     }
 
     @Override
     public T getValue(K key) {
-        return null;
+        return cacheMap.get(key).peekLast();
     }
 
+
     @Override
-    public Map<K, T> cache() {
-        return null;
+    public TreeMap<K, ConcurrentLinkedDeque<T>> cache() {
+        return cacheMap;
     }
 }

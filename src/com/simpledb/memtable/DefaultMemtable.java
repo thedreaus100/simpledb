@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,7 +49,7 @@ public class DefaultMemtable extends Memtable<String, String> {
     }
 
     @Override
-    public Set<String> getKeys() {
+    public NavigableSet<String> getKeys() {
         return cache().navigableKeySet();
     }
 

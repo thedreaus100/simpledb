@@ -209,6 +209,9 @@ public class DefaultProcessor extends Processor<String, String> {
             while(true){
                try{
 
+                   /*
+                        Redo Locking....
+                    */
                    logger.debug(String.format("Attempting to obtain read lock: %s", readWriteLock));
                    memtableReadLock.lock();
                    try{
