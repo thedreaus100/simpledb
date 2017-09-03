@@ -40,13 +40,13 @@ public class DefaultMemtable extends Memtable<String, String> {
        //blocks as long as nothing else is concurrently writing... and there are no ongoing reads
        logger.debug("Attempting to obtain write lock: " + writeLock);
        writeLock.lock();
-       logger.debug(String.format("Writing key %s\t", keyValuePair.getKey()));
        try{
            if(this.isFull()){
                throw new MemtableFullException();
            }else if(this.dumped.get()){
                throw new MemtableDumpedException();
            }
+           logger.debug(String.format("Writing key %s\t", keyValuePair.getKey()));
            cache().put(keyValuePair.getKey(), keyValuePair.getValue());
        }finally{
            //don't want to block while calculating used space
@@ -75,11 +75,13 @@ public class DefaultMemtable extends Memtable<String, String> {
 
         logger.debug(String.format("Attempting to obtain read lock: %s", readWriteLock));
         this.readLock.lock();
+        logger.debug(String.format("Lock Status %s", readWriteLock));
     }
 
     @Override
     public void unlock() {
         logger.debug(String.format("unlocking: %s", readWriteLock));
         this.readLock.unlock();
+        logger.debug(String.format("Lock Status %s", readWriteLock));
     }
 }

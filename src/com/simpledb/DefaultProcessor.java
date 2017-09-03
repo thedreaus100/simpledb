@@ -119,7 +119,7 @@ public class DefaultProcessor extends Processor<String, String> {
        once full interrupt Memtable manager Thread so that it can dump the memtable.
     */
     @Override
-    public synchronized  Memtable<String, String> waitForNextMemtable() {
+    public synchronized Memtable<String, String> waitForNextMemtable() {
 
         Memtable<String, String> memtable = null;
         while((memtable = getMemTable()) == null || memtable.isFull()){
@@ -139,8 +139,9 @@ public class DefaultProcessor extends Processor<String, String> {
     @Override
     public synchronized void wakeUpMemtableManagerThread(){
 
-        if(this.memtableManagerThread != null){
-            logger.debug("WAKING UP THREAD!!!");
+        if(this.memtableManagerThread != null
+                && (this.memtableManagerThread.getState().equals(Thread.State.TIMED_WAITING) || this.memtableManagerThread.getState().equals(Thread.State.WAITING))){
+            logger.debug(String.format("WAKING UP THREAD: %s \t %s", this.memtableManagerThread, this.memtableManagerThread.getState()));
             this.memtableManagerThread.interrupt();
         }
     }
@@ -188,6 +189,7 @@ public class DefaultProcessor extends Processor<String, String> {
                     prompt();
                 }else{
                     //wait for user input
+                    //Add atomic boolean isAsleep to prevent multiple Threads from interrupting this Thread!
                     Thread.sleep(1000);
                 }
             }catch(InterruptedException e){
