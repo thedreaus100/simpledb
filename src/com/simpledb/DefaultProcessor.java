@@ -227,22 +227,27 @@ public class DefaultProcessor extends Processor<String, String> {
 
             while(true){
                try{
+                   logger.debug("PROCESSING...");
                    Memtable<String, String> currentMemtable = memTable;
 
                    //wait until memtable is safe to read, then block futher writes.
                    currentMemtable.lock();
                    try{
-                       if(memTable.isFull()){
+                       if(currentMemtable.isFull()){
 
                            logger.debug("Memtable full initating dump!!!");
-                           this.cacheService.submit(dump(writer, memTable));
+                           this.cacheService.submit(dump(writer, currentMemtable));
 
-                           memTable.dumped();
-                           memTable = new DefaultMemtable(writer);
+                           //Obtain lock for notifyall
+                           synchronized (this){
 
-                           logger.debug("NOTIFIYING DUMP COMPLETION");
-                           notifyAll();
-                           logger.debug("DUMP COMPLETE!");
+                              currentMemtable.dumped();
+                              memTable = new DefaultMemtable(writer);
+
+                              logger.debug("NOTIFIYING DUMP COMPLETION");
+                              notifyAll();
+                              logger.debug("DUMP COMPLETE!");
+                          }
                        }
                    }finally{
                        currentMemtable.unlock();

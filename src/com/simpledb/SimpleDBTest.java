@@ -39,7 +39,7 @@ public class SimpleDBTest {
         final List<Runnable> runnables = new ArrayList<Runnable>();
         final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<Throwable>());
         final ExecutorService threadPool = Executors.newFixedThreadPool(2);
-        int maxTimeoutSeconds = 1;
+        int maxTimeoutSeconds = 5;
         String message = "INFO: ";
 
         try (final PipedInputStream pis = new PipedInputStream();

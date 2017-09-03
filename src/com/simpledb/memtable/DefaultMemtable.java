@@ -27,8 +27,13 @@ public class DefaultMemtable extends Memtable<String, String> {
 
     public DefaultMemtable(LogWriter<String, String> writer){
 
+        this(new ReentrantReadWriteLock(true), writer);
+    }
+
+    public DefaultMemtable(ReentrantReadWriteLock readWriteLock, LogWriter<String, String> writer){
+
         super(writer);
-        this.readWriteLock = new ReentrantReadWriteLock(true);
+        this.readWriteLock = readWriteLock;
         this.readLock = readWriteLock.readLock();
         this.writeLock = readWriteLock.writeLock();
         this.cacheMap = new TreeMap<String, String>();
@@ -48,10 +53,13 @@ public class DefaultMemtable extends Memtable<String, String> {
            }
            logger.debug(String.format("Writing key %s\t", keyValuePair.getKey()));
            cache().put(keyValuePair.getKey(), keyValuePair.getValue());
-       }finally{
-           //don't want to block while calculating used space
+
            writeLock.unlock();
            size.addAndGet(writer.calculateSpace(keyValuePair));
+       }finally{
+           if(writeLock.isHeldByCurrentThread()){
+               writeLock.unlock();
+           }
        }
     }
 
