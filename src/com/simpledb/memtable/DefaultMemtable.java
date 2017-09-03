@@ -6,38 +6,24 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class DefaultMemtable implements Memtable<String, String> {
-
-    protected final TreeMap<String, String> cacheMap;
-    protected long maxSize;
-    protected long maxBlockSize;
-    private AtomicLong size;
-    private final LogWriter<String> writer;
-    protected  ReentrantReadWriteLock.WriteLock writeLock;
-    protected AtomicBoolean dumped;
+public class DefaultMemtable extends Memtable<String, String> {
 
     //Log
     private Logger logger = LogManager.getRootLogger();
+    protected final TreeMap<String, String> cacheMap;
 
-    public DefaultMemtable(ReentrantReadWriteLock.WriteLock writeLock, LogWriter<String> writer){
+    public DefaultMemtable(ReentrantReadWriteLock.WriteLock writeLock, LogWriter<String, String> writer){
 
-        this.writeLock = writeLock;
-        this.writer = writer;
-        this.size = new AtomicLong(0);
+        super(writer);
         this.cacheMap = new TreeMap<String, String>();
-        this.maxSize = 1024 * 50;
-        this.maxBlockSize = 1024;
-        this.dumped = new AtomicBoolean(false);
-    }
-
-    @Override
-    public void dumped(){
-        this.dumped.getAndSet(true);
+        this.writeLock = writeLock;
     }
 
     @Override
@@ -53,7 +39,7 @@ public class DefaultMemtable implements Memtable<String, String> {
            }else if(this.dumped.get()){
                throw new MemtableDumpedException();
            }
-           cacheMap.put(keyValuePair.getKey(), keyValuePair.getValue());
+           cache().put(keyValuePair.getKey(), keyValuePair.getValue());
        }finally{
            //don't want to block while calculating used space
            writeLock.unlock();
@@ -62,35 +48,17 @@ public class DefaultMemtable implements Memtable<String, String> {
     }
 
     @Override
-    public long getSize() {
-        return size.get();
+    public Set<String> getKeys() {
+        return cache().navigableKeySet();
     }
 
     @Override
-    public long getMaxSize() {
-        return maxSize;
-    }
-
-    public void setMaxSize(long maxSize) {
-        this.maxSize = maxSize;
+    public String getValue(String key) {
+        return cache().get(key);
     }
 
     @Override
-    public long getMaxBlockSize() {
-        return maxBlockSize;
-    }
-
-    public void setMaxBlockSize(long maxBlockSize) {
-        this.maxBlockSize = maxBlockSize;
-    }
-
-    @Override
-    public boolean isFull() {
-        return size.get() >= maxSize;
-    }
-
-    @Override
-    public TreeMap<String, String> getMap() {
+    public TreeMap<String, String> cache() {
         return cacheMap;
     }
 }

@@ -108,7 +108,7 @@ public class DefaultLogWriter implements LogWriter<String, String> {
             ByteBuffer buffer = ByteBuffer
                     .allocate(memtable.getMaxBlockSize() <= Integer.MAX_VALUE ? (int)memtable.getMaxBlockSize(): Integer.MAX_VALUE);
 
-            Iterator<String> memtableKeys = memtable.getMap().navigableKeySet().iterator();
+            Iterator<String> memtableKeys = memtable.getKeys().iterator();
             int i = 0;
             String key = memtableKeys.next();
             do{
@@ -116,7 +116,7 @@ public class DefaultLogWriter implements LogWriter<String, String> {
                     if(i == 0){
                         index.insertKey(key, 0);
                     }
-                    Serializable value = memtable.getMap().get(key);
+                    Serializable value = memtable.getValue(key);
                     buffer.put(getBytes(key));
                     buffer.putChar(keyValuePairDelimiter);
                     buffer.put(getBytes((String) value)); //will add unnecessary space

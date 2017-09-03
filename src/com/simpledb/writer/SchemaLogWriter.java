@@ -59,7 +59,7 @@ public class SchemaLogWriter implements LogWriter<String, String>{
             int i = 0;
             long blockSize = 0;
             long pos = 0;
-            for(String key:memtable.getMap().navigableKeySet()){
+            for(String key:memtable.getKeys()){
 
                 if(i == 0){
                     index.insertKey(key, 0);
@@ -70,7 +70,7 @@ public class SchemaLogWriter implements LogWriter<String, String>{
                 }
                 GenericRecord record = new GenericData.Record(schema);
                 record.put("key", key);
-                record.put("value", memtable.getMap().get(key).toString());
+                record.put("value", memtable.getValue(key));
                 record.put("timestamp", DateTime.now().getMillis());
 
                 dataFileWriter.append(record);
