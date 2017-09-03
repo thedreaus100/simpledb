@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class DefaultLogWriter implements LogWriter<String> {
+public class DefaultLogWriter implements LogWriter<String, String> {
 
     protected final char fieldDelimiter;
     protected final char keyValuePairDelimiter;
@@ -42,7 +42,7 @@ public class DefaultLogWriter implements LogWriter<String> {
     }
 
     @Override
-    public int calculateSpace(KeyValuePair<String> keyValuePair) {
+    public int calculateSpace(KeyValuePair<String, String> keyValuePair) {
 
         int size = 2;
         size += getBytes(keyValuePair.getKey()).length;
@@ -80,7 +80,7 @@ public class DefaultLogWriter implements LogWriter<String> {
 
      */
     @Override
-    public LookupIndex dump(Memtable<String> memtable, boolean shouldLock) throws IOException {
+    public LookupIndex dump(Memtable<String, String> memtable, boolean shouldLock) throws IOException {
 
        if(shouldLock){
            readLock.lock();
@@ -94,7 +94,7 @@ public class DefaultLogWriter implements LogWriter<String> {
        }
     }
 
-    public LookupIndex _dump(Memtable<String> memtable) throws IOException {
+    public LookupIndex _dump(Memtable<String, String> memtable) throws IOException {
 
         logger.debug("Initiating Dump");
         String fileName = this.dirname + File.separator + DateTime.now().getMillis();

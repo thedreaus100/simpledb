@@ -1,4 +1,4 @@
-# Simple DB #
+# SimpleDB #
 
 
 **Description**

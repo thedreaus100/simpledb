@@ -11,9 +11,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class DefaultMemtable implements Memtable<String> {
+public class DefaultMemtable implements Memtable<String, String> {
 
-    private TreeMap<String, Serializable> cacheMap;
+    protected final TreeMap<String, String> cacheMap;
     protected long maxSize;
     protected long maxBlockSize;
     private AtomicLong size;
@@ -29,7 +29,7 @@ public class DefaultMemtable implements Memtable<String> {
         this.writeLock = writeLock;
         this.writer = writer;
         this.size = new AtomicLong(0);
-        this.cacheMap = new TreeMap<String, Serializable>();
+        this.cacheMap = new TreeMap<String, String>();
         this.maxSize = 1024 * 50;
         this.maxBlockSize = 1024;
         this.dumped = new AtomicBoolean(false);
@@ -41,7 +41,7 @@ public class DefaultMemtable implements Memtable<String> {
     }
 
     @Override
-    public void insert(KeyValuePair<String> keyValuePair) throws MemtableException {
+    public void insert(KeyValuePair<String, String> keyValuePair) throws MemtableException {
 
        //blocks as long as nothing else is concurrently writing... and there are no ongoing reads
        logger.debug("Attempting to obtain write lock: " + writeLock);
@@ -90,8 +90,7 @@ public class DefaultMemtable implements Memtable<String> {
     }
 
     @Override
-    public TreeMap<String, Serializable> getMap() {
-
+    public TreeMap<String, String> getMap() {
         return cacheMap;
     }
 }

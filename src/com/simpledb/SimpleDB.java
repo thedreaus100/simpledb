@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 
 public class SimpleDB {
 
-    private static Memtable<String> memTable;
     private static boolean test = true;
     private static ExecutorService service;
     private static Logger logger = LogManager.getRootLogger();

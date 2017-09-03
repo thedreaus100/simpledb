@@ -6,7 +6,7 @@ import com.simpledb.validators.CompoundValidator;
 import com.simpledb.validators.KeyValueFormatValidator;
 import com.simpledb.validators.Validator;
 
-public class ActionSETTokenizer implements Tokenizer<String> {
+public class ActionSETTokenizer implements Tokenizer<String, String> {
 
     private CompoundValidator<String> validator;
 
@@ -31,9 +31,9 @@ public class ActionSETTokenizer implements Tokenizer<String> {
 
 
     @Override
-    public KeyValuePair<String> tokenize(String input) {
+    public KeyValuePair<String, String> tokenize(String input) {
 
         String[] values = input.split(",\\s*");
-        return new KeyValuePair<String>(values[0], values[1]);
+        return new KeyValuePair<String, String>(values[0], values[1]);
     }
 }

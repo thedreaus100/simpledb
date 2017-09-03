@@ -27,12 +27,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class DefaultProcessor extends Processor<String> {
+public class DefaultProcessor extends Processor<String, String> {
 
     //Core
-    private Memtable<String> memTable;
+    private Memtable<String, String> memTable;
     private final ConcurrentLinkedDeque<LookupIndex> indexStack;
-    private final LogWriter<String> writer;
+    private final LogWriter<String, String> writer;
     private final ClientType clientType;
     private ReentrantReadWriteLock.ReadLock memtableReadLock;
     private ReentrantReadWriteLock.WriteLock memtableWriteLock;
@@ -47,7 +47,7 @@ public class DefaultProcessor extends Processor<String> {
 
     //Client Input
     private String prompt = ">\t";
-    private Map<String, Action<String>> actionMap;
+    private Map<String, Action<String, String>> actionMap;
     private ActionTokenizer actionTokenizer;
     private CompoundValidator<String> validator;
 
@@ -98,7 +98,7 @@ public class DefaultProcessor extends Processor<String> {
         this.inputStream = in;
         this.outputStream = out;
         this.printStream = new PrintStream(out);
-        this.actionMap = new HashMap<String, Action<String>>();
+        this.actionMap = new HashMap<String, Action<String, String>>();
         this.indexStack = new ConcurrentLinkedDeque<LookupIndex>();
         registerActions(this.actionMap);
 
@@ -108,14 +108,14 @@ public class DefaultProcessor extends Processor<String> {
                 .register(daemons);
     }
 
-    public void registerActions(Map<String, Action<String>> actionMap){
+    public void registerActions(Map<String, Action<String, String>> actionMap){
 
         actionMap.put("SET", new ActionSET(this, this.outputStream));
         actionMap.put("GET", new ActionGET(this, indexStack, this.outputStream));
     }
 
     @Override
-    public Memtable<String> getMemTable(){
+    public Memtable<String, String> getMemTable(){
         return this.memTable;
     }
 
@@ -153,8 +153,8 @@ public class DefaultProcessor extends Processor<String> {
                 input = scanner.nextLine();
                 if(input != null){
                     if(validator.validate(input)){
-                        KeyValuePair<String> queryPair = this.actionTokenizer.tokenize(input);
-                        Action<String> action = actionMap.get(queryPair.getKey().toUpperCase());
+                        KeyValuePair<String, String> queryPair = this.actionTokenizer.tokenize(input);
+                        Action<String, String> action = actionMap.get(queryPair.getKey().toUpperCase());
                         //TODO: Need to refactor KeyValuePair CAST isn't good!
 
                         Future<Result> futureResult = cacheService.submit(
@@ -244,7 +244,7 @@ public class DefaultProcessor extends Processor<String> {
     /*
         Doesn't need a lock because logically speaking nothing else should be able to continue writing to the dump while this is happening
      */
-    public Runnable dump(final LogWriter<String> writer, final Memtable<String> memTable){
+    public Runnable dump(final LogWriter<String, String> writer, final Memtable<String, String> memTable){
 
         return ()->{
 
