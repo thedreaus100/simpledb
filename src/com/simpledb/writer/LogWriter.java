@@ -6,8 +6,8 @@ import com.simpledb.memtable.Memtable;
 
 import java.io.IOException;
 
-public interface LogWriter<K> {
+public interface LogWriter<K, T> {
 
-    public int calculateSpace(KeyValuePair<K> keyValuePair);
-    public LookupIndex dump(final Memtable<K> memtable, boolean shouldLock) throws IOException;
+    public int calculateSpace(KeyValuePair<K, T> keyValuePair);
+    public LookupIndex dump(final Memtable<K, T> memtable, boolean shouldLock) throws IOException;
 }

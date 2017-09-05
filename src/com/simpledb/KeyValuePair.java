@@ -2,12 +2,12 @@ package com.simpledb;
 
 import java.io.Serializable;
 
-public class KeyValuePair<K> {
+public class KeyValuePair<K, T> {
 
     private K key;
-    private Serializable value;
+    private T value;
 
-    public KeyValuePair(K key, Serializable value){
+    public KeyValuePair(K key, T value){
         this.key = key;
         this.value = value;
     }
@@ -20,11 +20,11 @@ public class KeyValuePair<K> {
         this.key = key;
     }
 
-    public Serializable getValue() {
+    public T getValue() {
         return value;
     }
 
-    public void setValue(Serializable value) {
+    public void setValue(T value) {
         this.value = value;
     }
 

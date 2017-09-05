@@ -10,7 +10,7 @@ import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class ActionGET extends  Action<String>{
+public class ActionGET extends  Action<String, String>{
 
     private final ConcurrentLinkedDeque<LookupIndex> indexStack;
     public ActionGET(Processor processor, ConcurrentLinkedDeque<LookupIndex> indexStack, OutputStream out){
@@ -30,8 +30,8 @@ public class ActionGET extends  Action<String>{
             */
            public Result call() throws Exception {
 
-               Memtable<String> memtable = processor.getMemTable();
-               Object value = memtable.getMap().get(input.trim());
+               Memtable<String, String> memtable = processor.getMemTable();
+               Object value = memtable.getValue(input.trim());
                Result result = null;
                if(value != null){
                    result = new Result(value.toString());

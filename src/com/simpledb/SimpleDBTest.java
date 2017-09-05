@@ -39,7 +39,7 @@ public class SimpleDBTest {
         final List<Runnable> runnables = new ArrayList<Runnable>();
         final List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<Throwable>());
         final ExecutorService threadPool = Executors.newFixedThreadPool(2);
-        int maxTimeoutSeconds = 60 * 5;
+        int maxTimeoutSeconds = 5;
         String message = "INFO: ";
 
         try (final PipedInputStream pis = new PipedInputStream();
@@ -73,9 +73,9 @@ public class SimpleDBTest {
                 });
             }
 
-            assertTrue("Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent", allExecutorThreadsReady.await(runnables.size() * 10, TimeUnit.MILLISECONDS));
+            assertTrue("Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent", allExecutorThreadsReady.await(3000, TimeUnit.MILLISECONDS));
             afterInitBlocker.countDown();
-            assertTrue(message +" timeout! More than" + maxTimeoutSeconds + "seconds", allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS));
+            assertTrue(message +" timeout! More than " + maxTimeoutSeconds + " seconds ", allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,7 +113,7 @@ public class SimpleDBTest {
                 }
 
                 pos.flush();
-                System.out.println("TIME: " + ((double)(DateTime.now().getMillis() - startTime)/1000.00));
+                System.out.println("\nTIME: " + ((double)(DateTime.now().getMillis() - startTime)/1000.00));
             } catch (InterruptedException e) {
                 System.out.println("INTERUPPTED");
                 flag = false;

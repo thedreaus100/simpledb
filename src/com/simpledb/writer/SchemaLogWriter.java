@@ -15,7 +15,7 @@ import org.joda.time.DateTime;
 import java.io.File;
 import java.io.IOException;
 
-public class SchemaLogWriter implements LogWriter<String>{
+public class SchemaLogWriter implements LogWriter<String, String>{
 
     protected String schemaDir;
     protected String dataDir;
@@ -33,7 +33,7 @@ public class SchemaLogWriter implements LogWriter<String>{
         Need better way to calculate bytes
      */
     @Override
-    public int calculateSpace(KeyValuePair<String> keyValuePair) {
+    public int calculateSpace(KeyValuePair<String, String> keyValuePair) {
 
         int length = 0;
         length += keyValuePair.getKey().getBytes().length;
@@ -45,7 +45,7 @@ public class SchemaLogWriter implements LogWriter<String>{
     }
 
     @Override
-    public LookupIndex dump(Memtable<String> memtable, boolean shouldLock) throws IOException {
+    public LookupIndex dump(Memtable<String, String> memtable, boolean shouldLock) throws IOException {
 
         Schema schema = new Schema.Parser().parse(new File(this.schemaDir + File.separator + "default.avsc"));
         File file = new File(this.dataDir + File.separator + String.format("%s.avro", DateTime.now().getMillis()));
@@ -59,7 +59,7 @@ public class SchemaLogWriter implements LogWriter<String>{
             int i = 0;
             long blockSize = 0;
             long pos = 0;
-            for(String key:memtable.getMap().navigableKeySet()){
+            for(String key:memtable.getKeys()){
 
                 if(i == 0){
                     index.insertKey(key, 0);
@@ -70,7 +70,7 @@ public class SchemaLogWriter implements LogWriter<String>{
                 }
                 GenericRecord record = new GenericData.Record(schema);
                 record.put("key", key);
-                record.put("value", memtable.getMap().get(key).toString());
+                record.put("value", memtable.getValue(key));
                 record.put("timestamp", DateTime.now().getMillis());
 
                 dataFileWriter.append(record);

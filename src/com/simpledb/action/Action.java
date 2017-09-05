@@ -8,13 +8,13 @@ import com.simpledb.tokenizer.Tokenizer;
 import java.io.*;
 import java.util.concurrent.Callable;
 
-public abstract class Action<K> {
+public abstract class Action<K, T> {
 
-    protected Tokenizer<K> tokenizer;
+    protected Tokenizer<K, T> tokenizer;
     protected OutputStream out;
     protected final Processor processor;
 
-    public Action(Processor processor, Tokenizer<K> tokenizer, OutputStream out){
+    public Action(Processor processor, Tokenizer<K,T> tokenizer, OutputStream out){
 
         this.tokenizer = tokenizer;
         this.out = out;
