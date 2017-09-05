@@ -6,6 +6,7 @@ import com.simpledb.action.ActionSET;
 import com.simpledb.index.LookupIndex;
 import com.simpledb.memtable.DefaultMemtable;
 import com.simpledb.memtable.Memtable;
+import com.simpledb.memtable.VersionedMemtable;
 import com.simpledb.result.Result;
 import com.simpledb.tokenizer.ActionTokenizer;
 import com.simpledb.validators.CompoundValidator;
@@ -79,8 +80,10 @@ public class DefaultProcessor extends Processor<String, String> {
         this.clientType = clientType;
 
         //this.writer = new DefaultLogWriter(this.memtableReadLock);
+        //this.memTable = new DefaultMemtable(writer);
+
         this.writer = new SchemaLogWriter();
-        this.memTable = new DefaultMemtable(writer);
+        this.memTable = new VersionedMemtable<String, String>(writer);
         this.actionTokenizer = new ActionTokenizer();
         this.cacheService = Executors.newCachedThreadPool();
         this.daemons = Executors.newScheduledThreadPool(2);
@@ -242,7 +245,7 @@ public class DefaultProcessor extends Processor<String, String> {
                            synchronized (this){
 
                               currentMemtable.dumped();
-                              memTable = new DefaultMemtable(writer);
+                              memTable = new VersionedMemtable(writer);
 
                               logger.debug("NOTIFIYING DUMP COMPLETION");
                               notifyAll();

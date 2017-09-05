@@ -34,29 +34,37 @@ public class VersionedMemtable<K, T> extends Memtable<K, T> {
     @Override
     public void insert(KeyValuePair<K, T> keyValuePair) throws MemtableException {
 
-        try{
-            if(this.isFull()){
-                throw new MemtableFullException();
-            }else if(this.dumped.get()){
-                throw new MemtableDumpedException();
-            }
-
-            //If a lock is placed on the memtable block until lock is removed!
-            ConcurrentLinkedDeque<T> stack = cacheMap.get(keyValuePair.getKey());
-            stack.addLast(keyValuePair.getValue());
-        }finally{
-            size.addAndGet(writer.calculateSpace(keyValuePair));
+        //Consider race condition after read?  might be full
+        if(this.isFull()){
+            throw new MemtableFullException();
+        }else if(this.dumped.get()){
+            throw new MemtableDumpedException();
         }
+
+        blockWhileReading();
+
+        //HANDLE RACE CONDITIONS
+        logger.debug(String.format("Writing key %s\t", keyValuePair.getKey()));
+        ConcurrentLinkedDeque<T> stack = cache().get(keyValuePair.getKey());
+        if(stack == null) {
+            stack = new ConcurrentLinkedDeque<T>();
+            cache().putIfAbsent(keyValuePair.getKey(), stack);
+            stack = cache().get(keyValuePair.getKey());
+        }
+        stack.addLast(keyValuePair.getValue());
+        size.addAndGet(writer.calculateSpace(keyValuePair));
     }
 
     @Override
     public NavigableSet<K> getKeys() {
-        return cacheMap.navigableKeySet();
+        return cache().navigableKeySet();
     }
 
     @Override
     public T getValue(K key) {
-        return cacheMap.get(key).peekLast();
+
+        //Key might not exist.... have to initialize new stack here!!
+        return cache().get(key).peekLast();
     }
 
 
@@ -73,5 +81,19 @@ public class VersionedMemtable<K, T> extends Memtable<K, T> {
     @Override
     public void unlock() {
         lock.unlock();
+    }
+
+    public synchronized void blockWhileReading(){
+
+        //If a lock is placed on the memtable block until lock is removed!
+        while(lock.isLocked() && !lock.isHeldByCurrentThread()){
+            logger.debug(lock.isLocked() + " " + lock.isHeldByCurrentThread());
+            try{
+                wait(1000);
+            }catch(InterruptedException e){
+                logger.debug("Wait Interuptted Continue...");
+            }
+        }
+
     }
 }
